@@ -67,4 +67,55 @@ class BookController extends Controller
         Book::whereIn('id',$request->ids)->delete();
         return redirect('/books');
     }
+
+    // halaman edit buku
+    public function edit($id)
+    {
+        $book = Book::findOrFail($id);
+        return view('books.edit', compact('book'));
+    }
+
+    // update buku
+    public function update(Request $request, $id)
+    {
+        $book = Book::findOrFail($id);
+
+        $request->validate([
+            'judul' => 'required',
+            'pengarang' => 'required',
+            'edisi' => 'nullable',
+            'isbn_issn' => 'nullable',
+            'tahun_terbit' => 'nullable',
+            'tempat_terbit' => 'nullable',
+            'deskripsi_fisik' => 'nullable',
+            'bahasa' => 'nullable',
+            'gambar' => 'nullable|image|mimes:jpg,png,jpeg|max:2048'
+        ]);
+
+        $data = $request->all();
+
+        if ($request->hasFile('gambar')) {
+            $data['gambar'] = $request->file('gambar')->store('books','public');
+        }
+
+        $book->update($data);
+
+         return redirect('/books')->with('success','Buku berhasil diupdate');
+    }
+
+    public function eksemplar($id)
+    {
+        $book = Book::findOrFail($id);
+        return view('books.eksemplar', compact('book'));
+    }
+
+    public function storeEksemplar(Request $request, $id)
+    {
+        $book = Book::findOrFail($id);
+
+        $jumlah = $request->jumlah;
+
+        // sementara hanya menampilkan hasil
+        return redirect('/books')->with('success','Eksemplar berhasil diisi sebanyak '.$jumlah);
+    }
 }

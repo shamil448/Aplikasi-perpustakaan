@@ -47,6 +47,8 @@ border:none;
 border-radius:6px;
 cursor:pointer;
 font-size:14px;
+text-decoration:none;
+display:inline-block;
 }
 
 .btn-primary{
@@ -123,6 +125,22 @@ font-size:12px;
 color:#999;
 }
 
+.action-buttons{
+display:flex;
+gap:5px;
+}
+
+.eksemplar-box{
+display:flex;
+flex-direction:column;
+gap:6px;
+}
+
+.eksemplar-label{
+font-size:13px;
+color:#666;
+}
+
 </style>
 
 
@@ -144,28 +162,38 @@ Bibliografi
 
 <!-- SEARCH BAR -->
 
+<form method="GET" action="/books">
+
 <div class="search-bar">
 
 <label>Cari</label>
 
-<input class="search-input" type="text" placeholder="Cari buku...">
+<input
+class="search-input"
+type="text"
+name="search"
+placeholder="Cari buku..."
+value="{{ request('search') }}"
+>
 
-<select class="search-select">
-<option>Semua Ruas</option>
-<option>Judul</option>
-<option>Pengarang</option>
-<option>ISBN</option>
+<select class="search-select" name="field">
+<option value="all">Semua Ruas</option>
+<option value="judul">Judul</option>
+<option value="pengarang">Pengarang</option>
+<option value="isbn_issn">ISBN</option>
 </select>
 
-<button class="btn btn-gray">
+<button class="btn btn-gray" type="submit">
 Cari
 </button>
 
-<button class="btn btn-blue">
+<button class="btn btn-blue" type="button">
 Pencarian Spesifik
 </button>
 
 </div>
+
+</form>
 
 
 <form method="POST" action="/books/delete-selected">
@@ -195,9 +223,10 @@ Hilangkan Semua
 
 <tr>
 <th width="40">HAPUS</th>
-<th width="60">SUNTING</th>
+<th width="120">AKSI</th>
 <th>JUDUL</th>
 <th width="150">ISBN / ISSN</th>
+<th width="180">EKSEMPLAR</th>
 </tr>
 
 @foreach($books as $book)
@@ -205,21 +234,33 @@ Hilangkan Semua
 <tr>
 
 <td>
-<input type="checkbox" name="ids[]" value="{{ $book->id }}">
+<input type="checkbox" class="book-checkbox" name="ids[]" value="{{ $book->id }}">
 </td>
 
 <td>
+
+<div class="action-buttons">
+
+<a href="/books/{{ $book->id }}/edit" class="btn btn-secondary">
+✏️
+</a>
 
 <form action="/books/{{ $book->id }}" method="POST">
 
 @csrf
 @method('DELETE')
 
-<button class="btn btn-secondary" type="submit">
-✏️
+<button
+type="submit"
+class="btn btn-danger"
+onclick="return confirm('Yakin ingin menghapus buku ini?')"
+>
+🗑
 </button>
 
 </form>
+
+</div>
 
 </td>
 
@@ -261,6 +302,25 @@ Hilangkan Semua
 {{ $book->isbn_issn }}
 </td>
 
+
+<!-- EKSEMPLAR -->
+
+<td>
+
+<div class="eksemplar-box">
+
+<div class="eksemplar-label">
+Kelola Eksemplar
+</div>
+
+<a href="/books/{{ $book->id }}/eksemplar" class="btn btn-primary">
+Isi Eksemplar
+</a>
+
+</div>
+
+</td>
+
 </tr>
 
 @endforeach
@@ -275,11 +335,11 @@ Hilangkan Semua
 <script>
 
 function selectAll(){
-document.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.checked=true);
+document.querySelectorAll('.book-checkbox').forEach(cb=>cb.checked=true);
 }
 
 function unselectAll(){
-document.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.checked=false);
+document.querySelectorAll('.book-checkbox').forEach(cb=>cb.checked=false);
 }
 
 </script>
