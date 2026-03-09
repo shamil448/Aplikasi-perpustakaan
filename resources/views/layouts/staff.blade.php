@@ -1,208 +1,311 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<title>Staff Perpustakaan</title>
+    <title>Staff Perpustakaan</title>
 
-<style>
+    <style>
+        body {
+            margin: 0;
+            font-family: Segoe UI, Arial;
+            background: #f3f4f6;
+        }
 
-body{
-margin:0;
-font-family:Segoe UI,Arial;
-background:#f3f4f6;
-}
+        /* NAVBAR */
 
-/* NAVBAR */
+        .navbar {
+            background: white;
+            padding: 15px 30px;
+            display: flex;
+            gap: 25px;
+            align-items: center;
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
 
-.navbar{
-background:white;
-padding:15px 30px;
-display:flex;
-gap:25px;
-align-items:center;
-border-bottom:1px solid #e5e7eb;
-box-shadow:0 2px 6px rgba(0,0,0,0.05);
-}
+        .navbar a {
+            text-decoration: none;
+            color: #555;
+            font-size: 14px;
+            font-weight: 500;
+        }
 
-.navbar a{
-text-decoration:none;
-color:#555;
-font-size:14px;
-font-weight:500;
-}
+        .navbar a:hover {
+            color: #2563eb;
+        }
 
-.navbar a:hover{
-color:#2563eb;
-}
+        .navbar a.active {
+            color: #2563eb;
+            font-weight: 600;
+        }
 
-.navbar a.active{
-color:#2563eb;
-font-weight:600;
-}
+        /* LAYOUT */
 
-/* LAYOUT */
+        .container {
+            display: flex;
+        }
 
-.container{
-display:flex;
-}
+        /* SIDEBAR */
 
-/* SIDEBAR */
+        .sidebar {
+            width: 250px;
+            background: #1e3a8a;
+            color: white;
+            min-height: 100vh;
+            padding: 25px 18px;
+        }
 
-.sidebar{
-width:250px;
-background:#1e3a8a;
-color:white;
-min-height:100vh;
-padding:25px 18px;
-}
+        /* PROFILE */
 
-/* PROFILE */
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 35px;
+        }
 
-.profile{
-display:flex;
-align-items:center;
-gap:12px;
-margin-bottom:35px;
-}
+        .profile img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: white;
+        }
 
-.profile img{
-width:45px;
-height:45px;
-border-radius:50%;
-background:white;
-}
+        .profile b {
+            font-size: 15px;
+        }
 
-.profile b{
-font-size:15px;
-}
+        /* MENU TITLE */
 
-/* MENU TITLE */
+        .sidebar h4 {
+            font-size: 12px;
+            margin-top: 25px;
+            margin-bottom: 8px;
+            opacity: 0.7;
+            letter-spacing: 1px;
+        }
 
-.sidebar h4{
-font-size:12px;
-margin-top:25px;
-margin-bottom:8px;
-opacity:0.7;
-letter-spacing:1px;
-}
+        /* MENU LINK */
 
-/* MENU LINK */
+        .sidebar a {
+            display: block;
+            padding: 10px 12px;
+            margin: 3px 0;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: 0.2s;
+        }
 
-.sidebar a{
-display:block;
-padding:10px 12px;
-margin:3px 0;
-color:white;
-text-decoration:none;
-border-radius:6px;
-font-size:14px;
-transition:0.2s;
-}
+        .sidebar a:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
 
-.sidebar a:hover{
-background:rgba(255,255,255,0.15);
-}
+        /* MAIN */
 
-/* MAIN */
+        .main {
+            flex: 1;
+            padding: 35px;
+        }
 
-.main{
-flex:1;
-padding:35px;
-}
+        /* ===== CSS DARI INDEX ===== */
 
-/* CARD STYLE (buat halaman lain juga) */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
 
-.card{
-background:white;
-padding:25px;
-border-radius:10px;
-box-shadow:0 3px 10px rgba(0,0,0,0.06);
-}
+        .page-title {
+            font-size: 22px;
+            font-weight: 600;
+        }
 
-/* BUTTON */
+        .top-buttons {
+            display: flex;
+            gap: 10px;
+        }
 
-button{
-padding:8px 15px;
-border:none;
-border-radius:6px;
-cursor:pointer;
-font-weight:500;
-}
+        .search-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
 
-</style>
+        .search-input {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 320px;
+        }
+
+        .search-select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .btn {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+        }
+
+        .btn-gray {
+            background: #777;
+            color: white;
+        }
+
+        .btn-blue {
+            background: #1da1b9;
+            color: white;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            font-size: 13px;
+            color: #666;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #f1f1f1;
+        }
+
+        tr:hover {
+            background: #fafafa;
+        }
+
+        .book-cover {
+            width: 60px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .book-title {
+            font-weight: 600;
+        }
+
+        .book-author {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .book-meta {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .eksemplar-box {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .eksemplar-label {
+            font-size: 13px;
+            color: #666;
+        }
+    </style>
 
 </head>
 
 <body>
 
-<!-- NAVBAR -->
+    <!-- NAVBAR -->
 
-<div class="navbar">
+    <div class="navbar">
 
-<a href="#">Beranda</a>
-<a class="active">Bibliografi</a>
-<a href="#">Sirkulasi</a>
-<a href="#">Keanggotaan</a>
-<a href="#"></a>
-<a href="#"></a>
-<a href="#"></a>
-<a href="#"></a>
-<a href="#"></a>
+        <a href="#">Beranda</a>
+        <a class="active">Bibliografi</a>
+        <a href="#">Sirkulasi</a>
+        <a href="#">Keanggotaan</a>
 
-<form method="POST" action="/logout" style="margin-left:auto;">
-@csrf
-<button style="background:#ef4444;color:white;">
-Keluar
-</button>
-</form>
+        <form method="POST" action="/logout" style="margin-left:auto;">
+            @csrf
+            <button style="background:#ef4444;color:white;">
+                Keluar
+            </button>
+        </form>
 
-</div>
+    </div>
 
 
-<div class="container">
+    <div class="container">
 
-<!-- SIDEBAR -->
+        <!-- SIDEBAR -->
 
-<div class="sidebar">
+        <div class="sidebar">
 
-<div class="profile">
-<img src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
-<div>
-<b>Admin</b><br>
-<small>Pustakawan</small>
-</div>
-</div>
+            <div class="profile">
+                <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
+                <div>
+                    <b>Admin</b><br>
+                    <small>Pustakawan</small>
+                </div>
+            </div>
 
-<h4>BIBLIOGRAFI</h4>
-<a href="/books">Daftar Bibliografi</a>
-<a href="/books/create">Tambah Bibliografi Baru</a>
+            <h4>BIBLIOGRAFI</h4>
+            <a href="/books">Daftar Bibliografi</a>
+            <a href="/books/create">Tambah Bibliografi Baru</a>
 
-<h4>EKSEMPLAR</h4>
-<a href="#">Daftar Eksemplar</a>
-<a href="#">Daftar Eksemplar Keluar</a>
+            <h4>EKSEMPLAR</h4>
+            <a href="#">Daftar Eksemplar</a>
+            <a href="#">Daftar Eksemplar Keluar</a>
 
-<h4></h4>
-<a href="#"></a>
-<a href="#"></a>
-<a href="#"></a>
+        </div>
 
-<h4></h4>
-<a href="#"></a>
-<a href="#"></a>
-<a href="#"></a>
-<a href="#"></a>
-<a href="#"></a>
+        <!-- CONTENT -->
 
-</div>
+        <div class="main">
 
-<!-- CONTENT -->
+            @yield('content')
 
-<div class="main">
+        </div>
 
-@yield('content')
-
-</div>
-
-</div>
+    </div>
 
 </body>
+
 </html>

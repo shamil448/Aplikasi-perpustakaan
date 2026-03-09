@@ -51,7 +51,7 @@ class BookController extends Controller
         $gambar = null;
 
         if ($request->hasFile('gambar')) {
-            $gambar = $request->file('gambar')->store('books','public');
+            $gambar = $request->file('gambar')->store('books', 'public');
         }
 
         Book::create([
@@ -73,7 +73,7 @@ class BookController extends Controller
             'gambar' => $gambar
         ]);
 
-        return redirect('/books')->with('success','Buku berhasil ditambahkan');
+        return redirect('/books')->with('success', 'Buku berhasil ditambahkan');
     }
 
     // =============================
@@ -84,7 +84,7 @@ class BookController extends Controller
         Book::destroy($id);
 
         return redirect('/books')
-        ->with('success','Buku berhasil dihapus');
+            ->with('success', 'Buku berhasil dihapus');
     }
 
     // =============================
@@ -92,10 +92,10 @@ class BookController extends Controller
     // =============================
     public function deleteSelected(Request $request)
     {
-        Book::whereIn('id',$request->ids)->delete();
+        Book::whereIn('id', $request->ids)->delete();
 
         return redirect('/books')
-        ->with('success','Buku berhasil dihapus');
+            ->with('success', 'Buku berhasil dihapus');
     }
 
     // =============================
@@ -137,13 +137,13 @@ class BookController extends Controller
         $data = $request->all();
 
         if ($request->hasFile('gambar')) {
-            $data['gambar'] = $request->file('gambar')->store('books','public');
+            $data['gambar'] = $request->file('gambar')->store('books', 'public');
         }
 
         $book->update($data);
 
         return redirect('/books')
-        ->with('success','Buku berhasil diupdate');
+            ->with('success', 'Buku berhasil diupdate');
     }
 
     // =============================
@@ -181,6 +181,6 @@ class BookController extends Controller
 
         return redirect('/books')
 
-        ->with('success','Data eksemplar berhasil disimpan');
+            ->with('success', 'Data eksemplar berhasil disimpan');
     }
 }

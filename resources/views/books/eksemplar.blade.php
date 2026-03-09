@@ -2,102 +2,64 @@
 
 @section('content')
 
-<style>
-
-.page-title{
-font-size:22px;
-font-weight:600;
-margin-bottom:20px;
-}
-
-.card{
-background:white;
-padding:25px;
-border-radius:10px;
-box-shadow:0 4px 10px rgba(0,0,0,0.05);
-max-width:500px;
-}
-
-.form-group{
-margin-bottom:18px;
-}
-
-label{
-display:block;
-font-size:14px;
-font-weight:600;
-margin-bottom:6px;
-}
-
-input{
-width:100%;
-padding:10px;
-border:1px solid #ddd;
-border-radius:6px;
-}
-
-.btn{
-padding:10px 16px;
-border:none;
-border-radius:6px;
-cursor:pointer;
-font-size:14px;
-}
-
-.btn-primary{
-background:#2563eb;
-color:white;
-}
-
-.list{
-margin-top:20px;
-padding:10px;
-background:#f9f9f9;
-border-radius:6px;
-}
-
-</style>
-
 <div class="page-title">
-Isi Eksemplar Buku
+    Eksemplar Buku
 </div>
 
 <div class="card">
 
-<h3>{{ $book->judul }}</h3>
+    <h3>{{ $book->judul }}</h3>
 
-<p>Pengarang : {{ $book->pengarang }}</p>
-<p>ISBN : {{ $book->isbn_issn }}</p>
+    <p><b>Pengarang:</b> {{ $book->pengarang }}</p>
+    <p><b>ISBN:</b> {{ $book->isbn_issn }}</p>
+    <p><b>Tahun:</b> {{ $book->tahun_terbit }}</p>
 
-<hr>
+    <hr>
 
-<form method="POST" action="/books/{{ $book->id }}/eksemplar">
+    <h4>Tambah Eksemplar</h4>
 
-@csrf
+    <form method="POST" action="/books/{{ $book->id }}/eksemplar">
 
-<div class="form-group">
-<label>Nomor Eksemplar</label>
-<input type="text" name="eksemplar" placeholder="Contoh: MBR-001">
-</div>
+        @csrf
 
-<button class="btn btn-primary" type="submit">
-Simpan Eksemplar
-</button>
+        <div class="form-group">
+            <label>Kode Eksemplar</label>
+            <input type="text" name="eksemplar" placeholder="Contoh: MBR-001">
+        </div>
 
-</form>
+        <button class="btn btn-primary" type="submit">
+            Simpan
+        </button>
 
-@if(session('eksemplar'))
+    </form>
 
-<div class="list">
-<strong>Eksemplar tersimpan:</strong>
+    <hr>
 
-<ul>
-<li>{{ session('eksemplar') }}</li>
-</ul>
+    <h4>Daftar Eksemplar</h4>
 
-</div>
+    <table>
 
-@endif
+        <tr>
+            <th width="50">No</th>
+            <th>Kode Eksemplar</th>
+        </tr>
+
+        @if($book->eksemplar)
+
+        <tr>
+            <td>1</td>
+            <td>{{ $book->eksemplar }}</td>
+        </tr>
+
+        @else
+
+        <tr>
+            <td colspan="2">Belum ada eksemplar</td>
+        </tr>
+
+        @endif
+
+    </table>
 
 </div>
 
