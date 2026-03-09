@@ -82,3 +82,7 @@ Route::middleware(['auth','role:dosen'])->group(function(){
     Route::get('/dosen/dashboard',[DosenDashboardController::class,'index']);
 
 });
+
+Route::get('/mahasiswa/sirkulasi', function(){
+    return view('mahasiswa.sirkulasi');
+});

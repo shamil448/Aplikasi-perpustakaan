@@ -75,6 +75,12 @@ border-radius:6px;
 margin-bottom:10px;
 }
 
+.section-title{
+margin-top:25px;
+font-weight:600;
+color:#333;
+}
+
 </style>
 
 
@@ -128,6 +134,37 @@ Edit Buku
 <label>Bahasa Buku</label>
 <input type="text" name="bahasa" value="{{ $book->bahasa }}">
 </div>
+
+
+<div class="section-title">
+Data Eksemplar Buku
+</div>
+
+<div class="form-group">
+<label>No Panggil</label>
+<input type="text" name="no_panggil" value="{{ $book->no_panggil }}">
+</div>
+
+<div class="form-group">
+<label>Kode Inventaris</label>
+<input type="text" name="kode_inventaris" value="{{ $book->kode_inventaris }}">
+</div>
+
+<div class="form-group">
+<label>Lokasi</label>
+<input type="text" name="lokasi" value="{{ $book->lokasi }}">
+</div>
+
+<div class="form-group">
+<label>Lokasi Rak</label>
+<input type="text" name="lokasi_rak" value="{{ $book->lokasi_rak }}">
+</div>
+
+<div class="form-group">
+<label>Jumlah Eksemplar</label>
+<input type="number" name="eksemplar" value="{{ $book->eksemplar }}">
+</div>
+
 
 <div class="form-group">
 <label>Gambar Buku</label>

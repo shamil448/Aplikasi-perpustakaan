@@ -142,11 +142,11 @@ font-weight:500;
 <a class="active">Bibliografi</a>
 <a href="#">Sirkulasi</a>
 <a href="#">Keanggotaan</a>
-<a href="#">Daftar Terkendali</a>
-<a href="#">Inventarisasi</a>
-<a href="#">Sistem</a>
-<a href="#">Pelaporan</a>
-<a href="#">Kendali Terbitan Berseri</a>
+<a href="#"></a>
+<a href="#"></a>
+<a href="#"></a>
+<a href="#"></a>
+<a href="#"></a>
 
 <form method="POST" action="/logout" style="margin-left:auto;">
 @csrf
@@ -180,17 +180,17 @@ Keluar
 <a href="#">Daftar Eksemplar</a>
 <a href="#">Daftar Eksemplar Keluar</a>
 
-<h4>SALIN KATALOG</h4>
-<a href="#">Layanan MARC SRU</a>
-<a href="#">Layanan Z3950 SRU</a>
-<a href="#">Layanan P2P</a>
+<h4></h4>
+<a href="#"></a>
+<a href="#"></a>
+<a href="#"></a>
 
-<h4>PERALATAN</h4>
-<a href="#">Pencetakan Label</a>
-<a href="#">Cetak Barkod Eksemplar</a>
-<a href="#">Ekspor Data MARC</a>
-<a href="#">Impor Data MARC</a>
-<a href="#">Mencetak Katalog</a>
+<h4></h4>
+<a href="#"></a>
+<a href="#"></a>
+<a href="#"></a>
+<a href="#"></a>
+<a href="#"></a>
 
 </div>
 

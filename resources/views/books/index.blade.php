@@ -314,7 +314,7 @@ Kelola Eksemplar
 </div>
 
 <a href="/books/{{ $book->id }}/eksemplar" class="btn btn-primary">
-Isi Eksemplar
+Eksemplar
 </a>
 
 </div>

@@ -15,6 +15,13 @@ class Book extends Model
         'tempat_terbit',
         'deskripsi_fisik',
         'bahasa',
+
+        'no_panggil',
+        'kode_inventaris',
+        'lokasi',
+        'lokasi_rak',
+        'eksemplar',
+
         'gambar'
     ];
 }

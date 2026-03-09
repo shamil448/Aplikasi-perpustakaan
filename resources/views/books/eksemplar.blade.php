@@ -49,6 +49,13 @@ background:#2563eb;
 color:white;
 }
 
+.list{
+margin-top:20px;
+padding:10px;
+background:#f9f9f9;
+border-radius:6px;
+}
+
 </style>
 
 <div class="page-title">
@@ -70,7 +77,7 @@ Isi Eksemplar Buku
 
 <div class="form-group">
 <label>Nomor Eksemplar</label>
-<input type="number" name="jumlah" placeholder="Masukkan jumlah eksemplar">
+<input type="text" name="eksemplar" placeholder="Contoh: MBR-001">
 </div>
 
 <button class="btn btn-primary" type="submit">
@@ -78,6 +85,19 @@ Simpan Eksemplar
 </button>
 
 </form>
+
+@if(session('eksemplar'))
+
+<div class="list">
+<strong>Eksemplar tersimpan:</strong>
+
+<ul>
+<li>{{ session('eksemplar') }}</li>
+</ul>
+
+</div>
+
+@endif
 
 </div>
 

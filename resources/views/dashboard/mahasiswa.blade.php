@@ -1,6 +1,21 @@
-<h1>Dashboard Mahasiswa</h1>
+@extends('layouts.mahasiswa')
 
-<form method="POST" action="/logout">
-@csrf
-<button>Logout</button>
-</form>
+@section('content')
+
+<div class="card">
+
+<div class="title">
+Layanan Peminjaman Mandiri
+</div>
+
+<div class="subtitle">
+Sentuh tombol dibawah untuk memulai peminjaman buku
+</div>
+
+<a href="/mahasiswa/sirkulasi" class="touch-button">
+Sentuh Disini
+</a>
+
+</div>
+
+@endsection
