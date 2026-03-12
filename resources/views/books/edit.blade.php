@@ -93,14 +93,23 @@
         @csrf
         @method('PUT')
 
+
+        {{-- ========================= --}}
+        {{-- DATA BIBLIOGRAFI --}}
+        {{-- ========================= --}}
+
+        <div class="section-title">
+            Data Bibliografi
+        </div>
+
         <div class="form-group">
             <label>Judul Buku</label>
-            <input type="text" name="judul" value="{{ $book->judul }}">
+            <input type="text" name="judul" value="{{ $book->judul }}" required>
         </div>
 
         <div class="form-group">
             <label>Pengarang</label>
-            <input type="text" name="pengarang" value="{{ $book->pengarang }}">
+            <input type="text" name="pengarang" value="{{ $book->pengarang }}" required>
         </div>
 
         <div class="form-group">
@@ -134,8 +143,12 @@
         </div>
 
 
+        {{-- ========================= --}}
+        {{-- DATA INVENTARIS --}}
+        {{-- ========================= --}}
+
         <div class="section-title">
-            Data Eksemplar Buku
+            Data Inventaris Buku
         </div>
 
         <div class="form-group">
@@ -159,18 +172,31 @@
         </div>
 
         <div class="form-group">
-            <label>Jumlah Eksemplar</label>
-            <input type="number" name="eksemplar" value="{{ $book->eksemplar }}">
+            <label>Kode Eksemplar</label>
+            <input type="text" name="eksemplar"
+                value="{{ $book->eksemplar }}"
+                placeholder="Contoh: MBR-001">
         </div>
 
 
+        {{-- ========================= --}}
+        {{-- GAMBAR BUKU --}}
+        {{-- ========================= --}}
+
+        <div class="section-title">
+            Cover Buku
+        </div>
+
         <div class="form-group">
+
             <label>Gambar Buku</label>
 
             @if($book->gambar)
+
             <div class="current-cover">
                 <img src="{{ asset('storage/'.$book->gambar) }}" width="90">
             </div>
+
             @endif
 
             <input type="file" name="gambar" onchange="previewImage(event)">
@@ -178,6 +204,7 @@
             <div class="preview" id="preview"></div>
 
         </div>
+
 
         <button class="btn btn-primary" type="submit">
             Update Buku
@@ -197,9 +224,11 @@
         let file = event.target.files[0];
 
         if (file) {
+
             let img = document.createElement('img');
             img.src = URL.createObjectURL(file);
             preview.appendChild(img);
+
         }
 
     }

@@ -6,59 +6,60 @@ use App\Http\Controllers\BookController;
 use App\Http\Controllers\StaffDashboardController;
 use App\Http\Controllers\MahasiswaDashboardController;
 use App\Http\Controllers\DosenDashboardController;
+use App\Http\Controllers\SirkulasiController;
 
 
 // =======================
 // AUTH
 // =======================
 
-Route::get('/register',[AuthController::class,'showRegister']);
-Route::post('/register',[AuthController::class,'register']);
+Route::get('/register', [AuthController::class, 'showRegister']);
+Route::post('/register', [AuthController::class, 'register']);
 
-Route::get('/login',[AuthController::class,'showLogin'])->name('login');
-Route::post('/login',[AuthController::class,'login']);
-Route::post('/logout',[AuthController::class,'logout']);
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout']);
 
 
 // =======================
 // STAFF
 // =======================
 
-Route::middleware(['auth','role:staff'])->group(function(){
+Route::middleware(['auth', 'role:staff'])->group(function () {
 
     // dashboard staff
-    Route::get('/staff/dashboard',[StaffDashboardController::class,'index']);
+    Route::get('/staff/dashboard', [StaffDashboardController::class, 'index']);
 
     // =======================
     // BIBLIOGRAFI (BUKU)
     // =======================
 
     // daftar buku
-    Route::get('/books',[BookController::class,'index']);
+    Route::get('/books', [BookController::class, 'index']);
 
     // halaman tambah buku
-    Route::get('/books/create',[BookController::class,'create']);
+    Route::get('/books/create', [BookController::class, 'create']);
 
     // simpan buku
-    Route::post('/books',[BookController::class,'store']);
+    Route::post('/books', [BookController::class, 'store']);
 
     // halaman edit buku
-    Route::get('/books/{id}/edit',[BookController::class,'edit']);
+    Route::get('/books/{id}/edit', [BookController::class, 'edit']);
 
     // update buku
-    Route::put('/books/{id}',[BookController::class,'update']);
+    Route::put('/books/{id}', [BookController::class, 'update']);
 
     // hapus buku
-    Route::delete('/books/{id}',[BookController::class,'destroy']);
+    Route::delete('/books/{id}', [BookController::class, 'destroy']);
 
     // hapus banyak buku
-    Route::post('/books/delete-selected',[BookController::class,'deleteSelected']);
+    Route::post('/books/delete-selected', [BookController::class, 'deleteSelected']);
 
     // halaman eksemplar
-    Route::get('/books/{id}/eksemplar',[BookController::class,'eksemplar']);
+    Route::get('/books/{id}/eksemplar', [BookController::class, 'eksemplar']);
 
     // simpan eksemplar
-    Route::post('/books/{id}/eksemplar',[BookController::class,'storeEksemplar']);
+    Route::post('/books/{id}/eksemplar', [BookController::class, 'storeEksemplar']);
 });
 
 
@@ -66,10 +67,18 @@ Route::middleware(['auth','role:staff'])->group(function(){
 // MAHASISWA
 // =======================
 
-Route::middleware(['auth','role:mahasiswa'])->group(function(){
+Route::middleware(['auth', 'role:mahasiswa'])->group(function () {
 
-    Route::get('/mahasiswa/dashboard',[MahasiswaDashboardController::class,'index']);
+    // dashboard mahasiswa
+    Route::get('/mahasiswa/dashboard', [MahasiswaDashboardController::class, 'index']);
 
+    // halaman sirkulasi
+    Route::get('/mahasiswa/sirkulasi', function () {
+        return view('mahasiswa.sirkulasi');
+    });
+
+    // proses peminjaman buku
+    Route::post('/mahasiswa/pinjam', [SirkulasiController::class, 'pinjam']);
 });
 
 
@@ -77,12 +86,7 @@ Route::middleware(['auth','role:mahasiswa'])->group(function(){
 // DOSEN
 // =======================
 
-Route::middleware(['auth','role:dosen'])->group(function(){
+Route::middleware(['auth', 'role:dosen'])->group(function () {
 
-    Route::get('/dosen/dashboard',[DosenDashboardController::class,'index']);
-
-});
-
-Route::get('/mahasiswa/sirkulasi', function(){
-    return view('mahasiswa.sirkulasi');
+    Route::get('/dosen/dashboard', [DosenDashboardController::class, 'index']);
 });

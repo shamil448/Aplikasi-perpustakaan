@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('kode_inventaris')->nullable()->after('no_panggil');
             $table->string('lokasi')->nullable()->after('kode_inventaris');
             $table->string('lokasi_rak')->nullable()->after('lokasi');
-            $table->integer('eksemplar')->default(0)->after('lokasi_rak');
+            $table->string('eksemplar')->nullable()->after('lokasi_rak');
         });
     }
 

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 
 class BookController extends Controller
 {
+
     // =============================
     // LIST BUKU
     // =============================
@@ -16,6 +17,7 @@ class BookController extends Controller
         return view('books.index', compact('books'));
     }
 
+
     // =============================
     // HALAMAN TAMBAH BUKU
     // =============================
@@ -24,14 +26,17 @@ class BookController extends Controller
         return view('books.create');
     }
 
+
     // =============================
     // SIMPAN BUKU
     // =============================
     public function store(Request $request)
     {
+
         $request->validate([
             'judul' => 'required',
             'pengarang' => 'required',
+
             'edisi' => 'nullable',
             'isbn_issn' => 'nullable',
             'tahun_terbit' => 'nullable',
@@ -43,20 +48,29 @@ class BookController extends Controller
             'kode_inventaris' => 'nullable',
             'lokasi' => 'nullable',
             'lokasi_rak' => 'nullable',
-            'eksemplar' => 'nullable|integer',
+
+            // sekarang string
+            'eksemplar' => 'nullable|string',
 
             'gambar' => 'nullable|image|mimes:jpg,png,jpeg|max:2048'
         ]);
 
+
         $gambar = null;
 
         if ($request->hasFile('gambar')) {
-            $gambar = $request->file('gambar')->store('books', 'public');
+
+            $gambar = $request
+                ->file('gambar')
+                ->store('books', 'public');
         }
 
+
         Book::create([
+
             'judul' => $request->judul,
             'pengarang' => $request->pengarang,
+
             'edisi' => $request->edisi,
             'isbn_issn' => $request->isbn_issn,
             'tahun_terbit' => $request->tahun_terbit,
@@ -71,10 +85,15 @@ class BookController extends Controller
             'eksemplar' => $request->eksemplar,
 
             'gambar' => $gambar
+
         ]);
 
-        return redirect('/books')->with('success', 'Buku berhasil ditambahkan');
+
+        return redirect('/books')
+            ->with('success', 'Buku berhasil ditambahkan');
     }
+
+
 
     // =============================
     // HAPUS BUKU
@@ -87,37 +106,48 @@ class BookController extends Controller
             ->with('success', 'Buku berhasil dihapus');
     }
 
+
+
     // =============================
     // HAPUS BANYAK BUKU
     // =============================
     public function deleteSelected(Request $request)
     {
+
         Book::whereIn('id', $request->ids)->delete();
 
         return redirect('/books')
             ->with('success', 'Buku berhasil dihapus');
     }
 
+
+
     // =============================
     // HALAMAN EDIT BUKU
     // =============================
     public function edit($id)
     {
+
         $book = Book::findOrFail($id);
 
         return view('books.edit', compact('book'));
     }
+
+
 
     // =============================
     // UPDATE BUKU
     // =============================
     public function update(Request $request, $id)
     {
+
         $book = Book::findOrFail($id);
 
         $request->validate([
+
             'judul' => 'required',
             'pengarang' => 'required',
+
             'edisi' => 'nullable',
             'isbn_issn' => 'nullable',
             'tahun_terbit' => 'nullable',
@@ -129,58 +159,68 @@ class BookController extends Controller
             'kode_inventaris' => 'nullable',
             'lokasi' => 'nullable',
             'lokasi_rak' => 'nullable',
-            'eksemplar' => 'nullable|integer',
+
+            // ubah ke string
+            'eksemplar' => 'nullable|string',
 
             'gambar' => 'nullable|image|mimes:jpg,png,jpeg|max:2048'
+
         ]);
+
 
         $data = $request->all();
 
+
         if ($request->hasFile('gambar')) {
-            $data['gambar'] = $request->file('gambar')->store('books', 'public');
+
+            $data['gambar'] = $request
+                ->file('gambar')
+                ->store('books', 'public');
         }
 
+
         $book->update($data);
+
 
         return redirect('/books')
             ->with('success', 'Buku berhasil diupdate');
     }
+
+
 
     // =============================
     // HALAMAN EKSEMPLAR
     // =============================
     public function eksemplar($id)
     {
+
         $book = Book::findOrFail($id);
 
         return view('books.eksemplar', compact('book'));
     }
+
+
 
     // =============================
     // SIMPAN EKSEMPLAR
     // =============================
     public function storeEksemplar(Request $request, $id)
     {
+
         $request->validate([
-            'no_panggil' => 'nullable',
-            'kode_inventaris' => 'nullable',
-            'lokasi' => 'nullable',
-            'lokasi_rak' => 'nullable',
-            'eksemplar' => 'nullable|integer'
+            'eksemplar' => 'nullable|string'
         ]);
+
 
         $book = Book::findOrFail($id);
 
+
         $book->update([
-            'no_panggil' => $request->no_panggil,
-            'kode_inventaris' => $request->kode_inventaris,
-            'lokasi' => $request->lokasi,
-            'lokasi_rak' => $request->lokasi_rak,
             'eksemplar' => $request->eksemplar
         ]);
 
-        return redirect('/books')
 
+        return redirect('/books')
             ->with('success', 'Data eksemplar berhasil disimpan');
     }
 }

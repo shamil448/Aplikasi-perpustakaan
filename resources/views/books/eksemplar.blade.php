@@ -3,20 +3,50 @@
 @section('content')
 
 <div class="page-title">
-    Eksemplar Buku
+    Informasi Buku
 </div>
 
 <div class="card">
 
     <h3>{{ $book->judul }}</h3>
 
-    <p><b>Pengarang:</b> {{ $book->pengarang }}</p>
-    <p><b>ISBN:</b> {{ $book->isbn_issn }}</p>
-    <p><b>Tahun:</b> {{ $book->tahun_terbit }}</p>
+    <table style="margin-bottom:20px">
+
+        <tr>
+            <td width="150"><b>Pengarang</b></td>
+            <td>{{ $book->pengarang }}</td>
+        </tr>
+
+        <tr>
+            <td><b>ISBN / ISSN</b></td>
+            <td>{{ $book->isbn_issn }}</td>
+        </tr>
+
+        <tr>
+            <td><b>Tahun Terbit</b></td>
+            <td>{{ $book->tahun_terbit }}</td>
+        </tr>
+
+        <tr>
+            <td><b>No Panggil</b></td>
+            <td>{{ $book->no_panggil }}</td>
+        </tr>
+
+        <tr>
+            <td><b>Lokasi</b></td>
+            <td>{{ $book->lokasi }}</td>
+        </tr>
+
+        <tr>
+            <td><b>Lokasi Rak</b></td>
+            <td>{{ $book->lokasi_rak }}</td>
+        </tr>
+
+    </table>
 
     <hr>
 
-    <h4>Tambah Eksemplar</h4>
+    <h4>Kode Eksemplar</h4>
 
     <form method="POST" action="/books/{{ $book->id }}/eksemplar">
 
@@ -24,7 +54,7 @@
 
         <div class="form-group">
             <label>Kode Eksemplar</label>
-            <input type="text" name="eksemplar" placeholder="Contoh: MBR-001">
+            <input type="text" name="eksemplar" value="{{ $book->eksemplar }}" placeholder="Contoh: MBR-001">
         </div>
 
         <button class="btn btn-primary" type="submit">
@@ -35,7 +65,7 @@
 
     <hr>
 
-    <h4>Daftar Eksemplar</h4>
+    <h4>Data Eksemplar</h4>
 
     <table>
 
