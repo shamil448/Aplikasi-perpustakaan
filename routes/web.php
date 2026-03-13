@@ -79,6 +79,8 @@ Route::middleware(['auth', 'role:mahasiswa'])->group(function () {
 
     // proses peminjaman buku
     Route::post('/mahasiswa/pinjam', [SirkulasiController::class, 'pinjam']);
+
+    Route::get('/mahasiswa/pinjaman', [SirkulasiController::class, 'pinjamanSaatIni']);
 });
 
 

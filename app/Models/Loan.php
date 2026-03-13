@@ -14,4 +14,9 @@ class Loan extends Model
         'tanggal_kembali',
         'status'
     ];
+
+    public function book()
+    {
+        return $this->belongsTo(Book::class);
+    }
 }

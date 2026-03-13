@@ -13,23 +13,44 @@ class SirkulasiController extends Controller
     {
         $kode = $request->kode;
 
-        // cari buku berdasarkan kode eksemplar
-        $book = Book::Where('eksemplar', $kode)->first();
+        $book = Book::where('eksemplar', $kode)->first();
 
         if (!$book) {
             return back()->with('error', 'Kode eksemplar tidak ditemukan');
         }
 
-        $tanggalPinjam = Carbon::now();
-        $tanggalKembali = Carbon::now()->addDays(7);
+        // CEK apakah buku sedang dipinjam orang lain
+        $sedangDipinjam = Loan::where('kode_eksemplar', $kode)
+            ->where('status', 'dipinjam')
+            ->exists();
+
+        if ($sedangDipinjam) {
+
+            return back()->with('error', 'Buku dengan kode eksemplar ini sedang dipinjam');
+        }
+
+        // CEK batas maksimal pinjam mahasiswa
+        $jumlahPinjaman = Loan::where('user_id', auth()->id())
+            ->where('status', 'dipinjam')
+            ->count();
+
+        if ($jumlahPinjaman >= 2) {
+
+            return back()->with('error', 'Batas buku dipinjam hanya 2 buah');
+        }
+
+        $tanggalPinjam = now();
+        $tanggalKembali = now()->addDays(7);
 
         Loan::create([
+
             'user_id' => auth()->id(),
             'book_id' => $book->id,
             'kode_eksemplar' => $kode,
             'tanggal_pinjam' => $tanggalPinjam,
             'tanggal_kembali' => $tanggalKembali,
             'status' => 'dipinjam'
+
         ]);
 
         return back()->with([
@@ -38,5 +59,16 @@ class SirkulasiController extends Controller
             'tanggal_pinjam' => $tanggalPinjam,
             'tanggal_kembali' => $tanggalKembali
         ]);
+    }
+
+    public function pinjamanSaatIni()
+    {
+
+        $loans = \App\Models\Loan::where('user_id', auth()->id())
+            ->where('status', 'dipinjam')
+            ->with('book')
+            ->get();
+
+        return view('mahasiswa.pinjaman', compact('loans'));
     }
 }

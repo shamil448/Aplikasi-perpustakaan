@@ -138,7 +138,7 @@
         <div class="tabs">
 
             <a class="active">Peminjaman (F2)</a>
-            <a>Pinjaman Saat Ini (F3)</a>
+            <a href="/mahasiswa/pinjaman">Pinjaman Saat Ini (F3)</a>
             <a>Reservasi (F4)</a>
             <a>Denda (F9)</a>
             <a>Sejarah Peminjaman (F10)</a>
@@ -165,7 +165,7 @@
 
         @if(session('error'))
 
-        <div style="color:red;margin-top:20px;">
+        <div style="color:red;margin-top:20px;font-weight:600;">
             {{ session('error') }}
         </div>
 
