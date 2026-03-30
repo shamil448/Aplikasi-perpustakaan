@@ -9,8 +9,15 @@ use Carbon\Carbon;
 
 class SirkulasiController extends Controller
 {
+    // =============================
+    // PINJAM BUKU
+    // =============================
     public function pinjam(Request $request)
     {
+        $request->validate([
+            'kode' => 'required'
+        ]);
+
         $kode = $request->kode;
 
         $book = Book::where('eksemplar', $kode)->first();
@@ -25,7 +32,6 @@ class SirkulasiController extends Controller
             ->exists();
 
         if ($sedangDipinjam) {
-
             return back()->with('error', 'Buku dengan kode eksemplar ini sedang dipinjam');
         }
 
@@ -35,22 +41,21 @@ class SirkulasiController extends Controller
             ->count();
 
         if ($jumlahPinjaman >= 2) {
-
             return back()->with('error', 'Batas buku dipinjam hanya 2 buah');
         }
 
-        $tanggalPinjam = now();
-        $tanggalKembali = now()->addDays(7);
+        $tanggalPinjam = Carbon::now();
+        $tanggalKembali = Carbon::now()->addDays(7);
 
         Loan::create([
-
             'user_id' => auth()->id(),
             'book_id' => $book->id,
             'kode_eksemplar' => $kode,
             'tanggal_pinjam' => $tanggalPinjam,
             'tanggal_kembali' => $tanggalKembali,
-            'status' => 'dipinjam'
-
+            'status' => 'dipinjam',
+            'is_extended' => false,
+            'denda' => 0
         ]);
 
         return back()->with([
@@ -61,14 +66,77 @@ class SirkulasiController extends Controller
         ]);
     }
 
+
+    // =============================
+    // PINJAMAN SAAT INI
+    // =============================
     public function pinjamanSaatIni()
     {
-
-        $loans = \App\Models\Loan::where('user_id', auth()->id())
+        $loans = Loan::where('user_id', auth()->id())
             ->where('status', 'dipinjam')
             ->with('book')
+            ->latest()
             ->get();
 
         return view('mahasiswa.pinjaman', compact('loans'));
+    }
+
+
+    // =============================
+    // PERPANJANG
+    // =============================
+    public function perpanjang($id)
+    {
+        $loan = Loan::findOrFail($id);
+
+        // hanya boleh milik sendiri
+        if ($loan->user_id != auth()->id()) {
+            return back()->with('error', 'Akses ditolak');
+        }
+
+        if ($loan->is_extended) {
+            return back()->with('error', 'Buku sudah pernah diperpanjang');
+        }
+
+        // hanya bisa sebelum jatuh tempo
+        if (Carbon::now() > $loan->tanggal_kembali) {
+            return back()->with('error', 'Tidak bisa diperpanjang karena sudah lewat jatuh tempo');
+        }
+
+        $loan->tanggal_kembali = Carbon::parse($loan->tanggal_kembali)->addDays(7);
+        $loan->is_extended = true;
+        $loan->save();
+
+        return back()->with('success', 'Berhasil diperpanjang 7 hari');
+    }
+
+
+    // =============================
+    // DENDA
+    // =============================
+    public function denda($id)
+    {
+        $loan = Loan::findOrFail($id);
+
+        // hanya milik sendiri
+        if ($loan->user_id != auth()->id()) {
+            return back()->with('error', 'Akses ditolak');
+        }
+
+        $today = Carbon::now();
+        $jatuhTempo = Carbon::parse($loan->tanggal_kembali);
+
+        if ($today <= $jatuhTempo) {
+            return back()->with('error', 'Belum terlambat');
+        }
+
+        $telatHari = $jatuhTempo->diffInDays($today);
+        $denda = $telatHari * 1000;
+
+        // simpan ke database
+        $loan->denda = $denda;
+        $loan->save();
+
+        return back()->with('success', "Denda: Rp " . number_format($denda));
     }
 }

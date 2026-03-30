@@ -81,6 +81,9 @@ Route::middleware(['auth', 'role:mahasiswa'])->group(function () {
     Route::post('/mahasiswa/pinjam', [SirkulasiController::class, 'pinjam']);
 
     Route::get('/mahasiswa/pinjaman', [SirkulasiController::class, 'pinjamanSaatIni']);
+
+    Route::post('/mahasiswa/perpanjang/{id}', [SirkulasiController::class, 'perpanjang']);
+    Route::post('/mahasiswa/denda/{id}', [SirkulasiController::class, 'denda']);
 });
 
 

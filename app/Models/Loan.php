@@ -12,7 +12,17 @@ class Loan extends Model
         'kode_eksemplar',
         'tanggal_pinjam',
         'tanggal_kembali',
-        'status'
+        'status',
+
+        // tambahan baru
+        'is_extended',
+        'denda'
+    ];
+
+    protected $casts = [
+        'tanggal_pinjam' => 'date',
+        'tanggal_kembali' => 'date',
+        'is_extended' => 'boolean'
     ];
 
     public function book()
