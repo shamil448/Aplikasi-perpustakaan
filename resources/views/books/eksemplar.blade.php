@@ -46,25 +46,6 @@
 
     <hr>
 
-    <h4>Kode Eksemplar</h4>
-
-    <form method="POST" action="/books/{{ $book->id }}/eksemplar">
-
-        @csrf
-
-        <div class="form-group">
-            <label>Kode Eksemplar</label>
-            <input type="text" name="eksemplar" value="{{ $book->eksemplar }}" placeholder="Contoh: MBR-001">
-        </div>
-
-        <button class="btn btn-primary" type="submit">
-            Simpan
-        </button>
-
-    </form>
-
-    <hr>
-
     <h4>Data Eksemplar</h4>
 
     <table>
