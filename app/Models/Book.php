@@ -24,4 +24,9 @@ class Book extends Model
 
         'gambar'
     ];
+
+    public function loans()
+    {
+        return $this->hasMany(Loan::class);
+    }
 }

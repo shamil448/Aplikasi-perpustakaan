@@ -139,4 +139,26 @@ class SirkulasiController extends Controller
 
         return back()->with('success', "Denda: Rp " . number_format($denda));
     }
+
+    public function halamanBayar($id)
+    {
+        $loan = Loan::with('book')->findOrFail($id);
+
+        if ($loan->user_id != auth()->id()) {
+            return back()->with('error', 'Akses ditolak');
+        }
+
+        // hitung denda real
+        $today = now();
+        $jatuhTempo = $loan->tanggal_kembali;
+
+        $denda = 0;
+
+        if ($today > $jatuhTempo) {
+            $telatHari = $jatuhTempo->diffInDays($today);
+            $denda = $telatHari * 1000;
+        }
+
+        return view('mahasiswa.bayar', compact('loan', 'denda'));
+    }
 }

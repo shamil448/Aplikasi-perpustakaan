@@ -2,6 +2,24 @@
 
 @section('content')
 
+<style>
+    .status-available {
+        background: #28a745;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+    }
+
+    .status-empty {
+        background: #dc3545;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+    }
+</style>
+
 <div class="page-header">
 
     <div class="page-title">
@@ -79,6 +97,7 @@
                 <th width="120">AKSI</th>
                 <th>JUDUL</th>
                 <th width="150">ISBN / ISSN</th>
+                <th width="120">STATUS</th>
                 <th width="180">EKSEMPLAR</th>
             </tr>
 
@@ -152,6 +171,21 @@
 
                 <td>
                     {{ $book->isbn_issn }}
+                </td>
+
+                {{-- STATUS --}}
+                <td>
+                    @php
+                    $dipinjam = \App\Models\Loan::where('kode_eksemplar', $book->eksemplar)
+                    ->where('status', 'dipinjam')
+                    ->exists();
+                    @endphp
+
+                    @if($dipinjam)
+                    <span class="status-empty">Dipinjam</span>
+                    @else
+                    <span class="status-available">Tersedia</span>
+                    @endif
                 </td>
 
                 <td>

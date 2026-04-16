@@ -8,8 +8,6 @@
         gap: 30px;
     }
 
-    /* SIDEBAR */
-
     .sirkulasi {
         width: 320px;
         background: linear-gradient(180deg, #1e40af, #2563eb);
@@ -44,8 +42,6 @@
         font-weight: 600;
     }
 
-    /* KONTEN */
-
     .transaksi {
         flex: 1;
         background: white;
@@ -53,8 +49,6 @@
         border-radius: 10px;
         box-shadow: 0 3px 10px rgba(0, 0, 0, .08);
     }
-
-    /* TAB */
 
     .tabs {
         display: flex;
@@ -74,8 +68,6 @@
         color: #2563eb;
         font-weight: 600;
     }
-
-    /* TABLE */
 
     .table-modern {
         width: 100%;
@@ -105,8 +97,6 @@
         color: #888;
     }
 
-    /* BUTTON */
-
     .btn {
         padding: 6px 10px;
         border: none;
@@ -114,6 +104,8 @@
         color: white;
         cursor: pointer;
         font-size: 12px;
+        display: inline-block;
+        text-decoration: none;
     }
 
     .btn-green {
@@ -183,10 +175,10 @@
             <tr>
                 <td>{{ $loan->kode_eksemplar }}</td>
                 <td>{{ $loan->book->judul }}</td>
-                <td>{{ $loan->tanggal_pinjam }}</td>
-                <td>{{ $loan->tanggal_kembali }}</td>
+                <td>{{ $loan->tanggal_pinjam->format('d M Y') }}</td>
+                <td>{{ $loan->tanggal_kembali->format('d M Y') }}</td>
 
-                {{-- DENDA REALTIME --}}
+                {{-- DENDA --}}
                 <td>
                     @if($denda > 0)
                     <span style="color:#dc2626;font-weight:600;">
@@ -213,15 +205,12 @@
                     @endif
 
 
-                    {{-- DENDA --}}
+                    {{-- BAYAR DENDA (UPDATED 🔥) --}}
                     @if($today > $jatuhTempo)
 
-                    <form method="POST" action="/mahasiswa/denda/{{ $loan->id }}">
-                        @csrf
-                        <button class="btn btn-red">
-                            Bayar Denda
-                        </button>
-                    </form>
+                    <a href="{{ route('bayar', $loan->id) }}" class="btn btn-red">
+                        Bayar Denda
+                    </a>
 
                     @endif
 
