@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Book;
 use App\Models\Loan;
 use Carbon\Carbon;
+use Midtrans\Snap;
+use Midtrans\Config;
 
 class SirkulasiController extends Controller
 {
@@ -148,7 +150,9 @@ class SirkulasiController extends Controller
             return back()->with('error', 'Akses ditolak');
         }
 
-        // hitung denda real
+        // =========================
+        // HITUNG DENDA
+        // =========================
         $today = now();
         $jatuhTempo = $loan->tanggal_kembali;
 
@@ -159,6 +163,72 @@ class SirkulasiController extends Controller
             $denda = $telatHari * 1000;
         }
 
-        return view('mahasiswa.bayar', compact('loan', 'denda'));
+        // =========================
+        // VALIDASI DENDA
+        // =========================
+        if ($denda <= 0) {
+            return back()->with('error', 'Tidak ada denda untuk dibayar');
+        }
+
+        // =========================
+        // CONFIG MIDTRANS (HARD FIX 🔥)
+        // =========================
+        Config::$serverKey = config('midtrans.server_key');
+        Config::$isProduction = config('midtrans.is_production');
+        Config::$isSanitized = true;
+        Config::$is3ds = config('midtrans.is_3ds');
+
+        $params = [
+            'transaction_details' => [
+                'order_id' => 'LOAN-' . $loan->id . '-' . time(),
+                'gross_amount' => (int) $denda,
+            ],
+
+            'item_details' => [
+                [
+                    'id' => $loan->id,
+                    'price' => (int) $denda,
+                    'quantity' => 1,
+                    'name' => 'Denda Buku: ' . $loan->book->judul,
+                ]
+            ],
+
+            'customer_details' => [
+                'first_name' => auth()->user()->name,
+                'email' => auth()->user()->email ?? 'user@gmail.com',
+            ],
+        ];
+
+        $snapToken = Snap::getSnapToken($params);
+
+        return view('mahasiswa.bayar', compact('loan', 'denda', 'snapToken'));
+    }
+
+    public function callback(Request $request)
+    {
+        \Midtrans\Config::$serverKey = config('midtrans.server_key');
+        \Midtrans\Config::$isProduction = config('midtrans.is_production');
+
+        $notif = new \Midtrans\Notification();
+
+        $orderId = $notif->order_id;
+
+        // ambil ID loan dari order_id
+        preg_match('/LOAN-(\d+)-/', $orderId, $matches);
+        $loanId = $matches[1] ?? null;
+
+        $loan = Loan::find($loanId);
+
+        if (!$loan) {
+            return response()->json(['error' => 'Loan not found']);
+        }
+
+        if (in_array($notif->transaction_status, ['settlement', 'capture'])) {
+            $loan->status = 'lunas';
+            $loan->denda = 0;
+            $loan->save();
+        }
+
+        return response()->json(['success' => true]);
     }
 }
