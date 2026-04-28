@@ -231,4 +231,15 @@ class SirkulasiController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    public function halamanDenda()
+    {
+        $loans = Loan::where('user_id', auth()->id())
+            ->where('status', 'dipinjam')
+            ->with('book')
+            ->latest()
+            ->get();
+
+        return view('mahasiswa.denda', compact('loans'));
+    }
 }

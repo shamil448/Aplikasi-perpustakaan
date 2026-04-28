@@ -47,10 +47,10 @@
         background: white;
         padding: 25px;
         border-radius: 10px;
-        box-shadow: 0 3px 10px rgba(0, 0, 0, .08);
+        box-shadow: 0 3px 10px rgba(0,0,0,.08);
     }
 
-    /* ================= TAB ================= */
+    /* ================= TAB FIX ================= */
     .tabs {
         display: flex;
         gap: 25px;
@@ -63,7 +63,7 @@
         color: #444;
         font-weight: 500;
         position: relative;
-        transition: 0.2s;
+        transition: .2s;
     }
 
     .tabs a:hover {
@@ -85,33 +85,14 @@
         background: #2563eb;
         border-radius: 2px;
     }
+    /* =========================================== */
 
-    /* BADGE NOTIF */
-    .badge {
-        background: #dc2626;
-        color: white;
-        font-size: 11px;
-        padding: 3px 7px;
-        border-radius: 50px;
-        margin-left: 6px;
-        font-weight: 600;
-    }
-
-    /* ================= TABLE ================= */
     .table-modern {
         width: 100%;
         border-collapse: collapse;
     }
 
-    .table-modern th {
-        text-align: left;
-        font-size: 14px;
-        color: #666;
-        padding: 10px;
-        border-bottom: 2px solid #eee;
-    }
-
-    .table-modern td {
+    .table-modern th, .table-modern td {
         padding: 12px 10px;
         border-bottom: 1px solid #eee;
     }
@@ -126,35 +107,15 @@
         color: #888;
     }
 
-    .btn {
-        padding: 6px 10px;
-        border: none;
-        border-radius: 6px;
-        color: white;
-        cursor: pointer;
-        font-size: 12px;
-        display: inline-block;
-        text-decoration: none;
-    }
-
-    .btn-green {
-        background: #16a34a;
-    }
-
     .btn-red {
         background: #dc2626;
+        color: white;
+        padding: 6px 10px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 12px;
     }
 </style>
-
-@php
-$dendaCount = 0;
-
-foreach ($loans as $loan) {
-    if (now() > $loan->tanggal_kembali) {
-        $dendaCount++;
-    }
-}
-@endphp
 
 <div class="wrapper">
 
@@ -165,40 +126,31 @@ foreach ($loans as $loan) {
             <a href="/mahasiswa/sirkulasi">Mulai Transaksi</a>
             <a>Pengembalian Kilat</a>
             <a>Aturan Peminjaman</a>
-            <a class="active">Sejarah Peminjaman</a>
+            <a>Sejarah Peminjaman</a>
             <a>Peringatan Jatuh Tempo</a>
-            <a>Daftar Keterlambatan</a>
+            <a class="active">Daftar Keterlambatan</a>
             <a>Reservasi</a>
         </div>
     </div>
 
-    <!-- KONTEN -->
+    <!-- CONTENT -->
     <div class="transaksi">
 
         <div class="tabs">
             <a href="/mahasiswa/sirkulasi">Peminjaman (F2)</a>
-            <a class="active">Pinjaman Saat Ini (F3)</a>
+            <a href="/mahasiswa/pinjaman">Pinjaman Saat Ini (F3)</a>
             <a>Reservasi (F4)</a>
-
-            <a href="/mahasiswa/denda">
-                Denda (F9)
-                @if($dendaCount > 0)
-                    <span class="badge">{{ $dendaCount }}</span>
-                @endif
-            </a>
-
+            <a class="active">Denda (F9)</a>
             <a>Sejarah Peminjaman (F10)</a>
         </div>
 
-        <h3 style="margin-bottom:20px;">Pinjaman Saat Ini</h3>
+        <h3 style="margin-bottom:20px;">Daftar Denda</h3>
 
         <table class="table-modern">
-
             <tr>
-                <th>Kode</th>
                 <th>Judul</th>
-                <th>Pinjam</th>
-                <th>Kembali</th>
+                <th>Jatuh Tempo</th>
+                <th>Telat</th>
                 <th>Denda</th>
                 <th>Aksi</th>
             </tr>
@@ -206,57 +158,38 @@ foreach ($loans as $loan) {
             @forelse($loans as $loan)
 
             @php
-            $today = now();
-            $jatuhTempo = $loan->tanggal_kembali;
+                $today = now();
+                $jatuhTempo = $loan->tanggal_kembali;
 
-            $denda = 0;
+                $telat = 0;
+                $denda = 0;
 
-            if ($today > $jatuhTempo) {
-                $telatHari = $jatuhTempo->diffInDays($today);
-                $denda = $telatHari * 1000;
-            }
+                if ($today > $jatuhTempo) {
+                    $telat = $jatuhTempo->diffInDays($today);
+                    $denda = $telat * 1000;
+                }
             @endphp
 
+            @if($denda > 0)
             <tr>
-                <td>{{ $loan->kode_eksemplar }}</td>
                 <td>{{ $loan->book->judul }}</td>
-                <td>{{ $loan->tanggal_pinjam->format('d M Y') }}</td>
                 <td>{{ $loan->tanggal_kembali->format('d M Y') }}</td>
-
-                <td>
-                    @if($denda > 0)
-                        <span style="color:#dc2626;font-weight:600;">
-                            Rp {{ number_format($denda) }}
-                        </span>
-                    @else
-                        -
-                    @endif
+                <td>{{ $telat }} hari</td>
+                <td style="color:#dc2626;font-weight:600;">
+                    Rp {{ number_format($denda) }}
                 </td>
-
                 <td>
-
-                    @if(!$loan->is_extended && $today->diffInDays($jatuhTempo, false) == 1)
-                        <form method="POST" action="/mahasiswa/perpanjang/{{ $loan->id }}">
-                            @csrf
-                            <button class="btn btn-green">
-                                Perpanjang
-                            </button>
-                        </form>
-                    @endif
-
-                    @if($today > $jatuhTempo)
-                        <a href="{{ route('bayar', $loan->id) }}" class="btn btn-red">
-                            Aktivasi Denda
-                        </a>
-                    @endif
-
+                    <a href="{{ route('bayar', $loan->id) }}" class="btn-red">
+                        Bayar
+                    </a>
                 </td>
             </tr>
+            @endif
 
             @empty
             <tr>
-                <td colspan="6" class="empty">
-                    Tidak ada buku yang sedang dipinjam
+                <td colspan="5" class="empty">
+                    Tidak ada denda
                 </td>
             </tr>
             @endforelse
