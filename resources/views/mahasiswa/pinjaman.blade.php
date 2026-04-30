@@ -150,9 +150,9 @@
 $dendaCount = 0;
 
 foreach ($loans as $loan) {
-    if (now() > $loan->tanggal_kembali) {
-        $dendaCount++;
-    }
+if (now() > $loan->tanggal_kembali) {
+$dendaCount++;
+}
 }
 @endphp
 
@@ -183,7 +183,7 @@ foreach ($loans as $loan) {
             <a href="/mahasiswa/denda">
                 Denda (F9)
                 @if($dendaCount > 0)
-                    <span class="badge">{{ $dendaCount }}</span>
+                <span class="badge">{{ $dendaCount }}</span>
                 @endif
             </a>
 
@@ -212,8 +212,8 @@ foreach ($loans as $loan) {
             $denda = 0;
 
             if ($today > $jatuhTempo) {
-                $telatHari = $jatuhTempo->diffInDays($today);
-                $denda = $telatHari * 1000;
+            $telatHari = $jatuhTempo->diffInDays($today);
+            $denda = $telatHari * 1000;
             }
             @endphp
 
@@ -225,29 +225,32 @@ foreach ($loans as $loan) {
 
                 <td>
                     @if($denda > 0)
-                        <span style="color:#dc2626;font-weight:600;">
-                            Rp {{ number_format($denda) }}
-                        </span>
+                    <span style="color:#dc2626;font-weight:600;">
+                        Rp {{ number_format($denda) }}
+                    </span>
                     @else
-                        -
+                    -
                     @endif
                 </td>
 
                 <td>
 
                     @if(!$loan->is_extended && $today->diffInDays($jatuhTempo, false) == 1)
-                        <form method="POST" action="/mahasiswa/perpanjang/{{ $loan->id }}">
-                            @csrf
-                            <button class="btn btn-green">
-                                Perpanjang
-                            </button>
-                        </form>
+                    <form method="POST" action="/mahasiswa/perpanjang/{{ $loan->id }}">
+                        @csrf
+                        <button class="btn btn-green">
+                            Perpanjang
+                        </button>
+                    </form>
                     @endif
 
                     @if($today > $jatuhTempo)
-                        <a href="{{ route('bayar', $loan->id) }}" class="btn btn-red">
+                    <form method="POST" action="/mahasiswa/aktivasi-denda/{{ $loan->id }}">
+                        @csrf
+                        <button class="btn btn-red">
                             Aktivasi Denda
-                        </a>
+                        </button>
+                    </form>
                     @endif
 
                 </td>

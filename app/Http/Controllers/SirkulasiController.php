@@ -75,7 +75,7 @@ class SirkulasiController extends Controller
     public function pinjamanSaatIni()
     {
         $loans = Loan::where('user_id', auth()->id())
-            ->where('status', 'dipinjam')
+            ->where('status', 'dipinjam') // 🔥 penting
             ->with('book')
             ->latest()
             ->get();
@@ -235,11 +235,31 @@ class SirkulasiController extends Controller
     public function halamanDenda()
     {
         $loans = Loan::where('user_id', auth()->id())
-            ->where('status', 'dipinjam')
+            ->where('status', 'denda')
             ->with('book')
             ->latest()
             ->get();
 
         return view('mahasiswa.denda', compact('loans'));
+    }
+
+    public function aktivasiDenda($id)
+    {
+        $loan = Loan::findOrFail($id);
+
+        if ($loan->user_id != auth()->id()) {
+            return back()->with('error', 'Akses ditolak');
+        }
+
+        // cek sudah lewat jatuh tempo
+        if (now() <= $loan->tanggal_kembali) {
+            return back()->with('error', 'Belum kena denda');
+        }
+
+        // ubah status
+        $loan->status = 'denda';
+        $loan->save();
+
+        return redirect('/mahasiswa/denda')->with('success', 'Denda diaktifkan');
     }
 }

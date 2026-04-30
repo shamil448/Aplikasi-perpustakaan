@@ -91,6 +91,8 @@ Route::middleware(['auth', 'role:mahasiswa'])->group(function () {
     Route::post('/midtrans/callback', [SirkulasiController::class, 'callback']);
 
     Route::get('/mahasiswa/denda', [SirkulasiController::class, 'halamanDenda']);
+
+    Route::post('/mahasiswa/aktivasi-denda/{id}', [SirkulasiController::class, 'aktivasiDenda']);
 });
 
 
