@@ -235,13 +235,22 @@ $dendaCount++;
 
                 <td>
 
-                    @if(!$loan->is_extended && $today->diffInDays($jatuhTempo, false) == 1)
+                    @if(
+                    !$loan->is_extended &&
+                    $today->format('Y-m-d') ==
+                    \Carbon\Carbon::parse($loan->tanggal_kembali)
+                    ->subDay()
+                    ->format('Y-m-d')
+                    )
+
                     <form method="POST" action="/mahasiswa/perpanjang/{{ $loan->id }}">
                         @csrf
+
                         <button class="btn btn-green">
-                            Perpanjang
+                            Perpanjang 7 Hari
                         </button>
                     </form>
+
                     @endif
 
                     @if($today > $jatuhTempo)
