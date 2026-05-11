@@ -50,7 +50,6 @@
         box-shadow: 0 3px 10px rgba(0, 0, 0, .08);
     }
 
-    /* ================= TAB ================= */
     .tabs {
         display: flex;
         gap: 25px;
@@ -63,11 +62,6 @@
         color: #444;
         font-weight: 500;
         position: relative;
-        transition: 0.2s;
-    }
-
-    .tabs a:hover {
-        color: #2563eb;
     }
 
     .tabs a.active {
@@ -83,21 +77,8 @@
         width: 100%;
         height: 2px;
         background: #2563eb;
-        border-radius: 2px;
     }
 
-    /* BADGE NOTIF */
-    .badge {
-        background: #dc2626;
-        color: white;
-        font-size: 11px;
-        padding: 3px 7px;
-        border-radius: 50px;
-        margin-left: 6px;
-        font-weight: 600;
-    }
-
-    /* ================= TABLE ================= */
     .table-modern {
         width: 100%;
         border-collapse: collapse;
@@ -120,41 +101,22 @@
         background: #f9fafb;
     }
 
+    .status-kembali {
+        color: #16a34a;
+        font-weight: 600;
+    }
+
+    .status-lunas {
+        color: #2563eb;
+        font-weight: 600;
+    }
+
     .empty {
         text-align: center;
         padding: 20px;
         color: #888;
     }
-
-    .btn {
-        padding: 6px 10px;
-        border: none;
-        border-radius: 6px;
-        color: white;
-        cursor: pointer;
-        font-size: 12px;
-        display: inline-block;
-        text-decoration: none;
-    }
-
-    .btn-green {
-        background: #16a34a;
-    }
-
-    .btn-red {
-        background: #dc2626;
-    }
 </style>
-
-@php
-$dendaCount = 0;
-
-foreach ($loans as $loan) {
-if (now() > $loan->tanggal_kembali) {
-$dendaCount++;
-}
-}
-@endphp
 
 <div class="wrapper">
 
@@ -177,89 +139,43 @@ $dendaCount++;
 
         <div class="tabs">
             <a href="/mahasiswa/sirkulasi">Peminjaman (F2)</a>
-            <a class="active">Pinjaman Saat Ini (F3)</a>
+            <a href="/mahasiswa/pinjaman">Pinjaman Saat Ini (F3)</a>
             <a>Reservasi (F4)</a>
-
-            <a href="/mahasiswa/denda">
-                Denda (F9)
-                @if($dendaCount > 0)
-                <span class="badge">{{ $dendaCount }}</span>
-                @endif
-            </a>
-
-            <a href="/mahasiswa/sejarah" class="active">Sejarah Peminjaman (F10)</a>
+            <a href="/mahasiswa/denda">Denda (F9)</a>
+            <a class="active">Sejarah Peminjaman (F10)</a>
         </div>
 
-        <h3 style="margin-bottom:20px;">Pinjaman Saat Ini</h3>
+        <h3 style="margin-bottom:20px;">Sejarah Peminjaman</h3>
 
         <table class="table-modern">
 
             <tr>
-                <th>Kode</th>
-                <th>Judul</th>
-                <th>Pinjam</th>
-                <th>Kembali</th>
-                <th>Denda</th>
-                <th>Aksi</th>
+                <th>Nama</th>
+                <th>Judul Buku</th>
+                <th>Tanggal Pinjam</th>
+                <th>Tanggal Kembali</th>
+                <th>Status</th>
             </tr>
 
             @forelse($loans as $loan)
-
-            @php
-            $today = now();
-            $jatuhTempo = $loan->tanggal_kembali;
-
-            $denda = 0;
-
-            if ($today > $jatuhTempo) {
-            $telatHari = $jatuhTempo->diffInDays($today);
-            $denda = $telatHari * 1000;
-            }
-            @endphp
-
             <tr>
-                <td>{{ $loan->kode_eksemplar }}</td>
+                <td>{{ $loan->user->name }}</td>
                 <td>{{ $loan->book->judul }}</td>
                 <td>{{ $loan->tanggal_pinjam->format('d M Y') }}</td>
                 <td>{{ $loan->tanggal_kembali->format('d M Y') }}</td>
 
                 <td>
-                    @if($denda > 0)
-                    <span style="color:#dc2626;font-weight:600;">
-                        Rp {{ number_format($denda) }}
-                    </span>
+                    @if($loan->status == 'lunas')
+                    <span class="status-lunas">Lunas</span>
                     @else
-                    -
+                    <span class="status-kembali">Kembali</span>
                     @endif
-                </td>
-
-                <td>
-
-                    @if(!$loan->is_extended && $today->diffInDays($jatuhTempo, false) == 1)
-                    <form method="POST" action="/mahasiswa/perpanjang/{{ $loan->id }}">
-                        @csrf
-                        <button class="btn btn-green">
-                            Perpanjang
-                        </button>
-                    </form>
-                    @endif
-
-                    @if($today > $jatuhTempo)
-                    <form method="POST" action="/mahasiswa/aktivasi-denda/{{ $loan->id }}">
-                        @csrf
-                        <button class="btn btn-red">
-                            Aktivasi Denda
-                        </button>
-                    </form>
-                    @endif
-
                 </td>
             </tr>
-
             @empty
             <tr>
-                <td colspan="6" class="empty">
-                    Tidak ada buku yang sedang dipinjam
+                <td colspan="5" class="empty">
+                    Belum ada riwayat peminjaman
                 </td>
             </tr>
             @endforelse

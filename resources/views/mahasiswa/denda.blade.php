@@ -47,7 +47,7 @@
         background: white;
         padding: 25px;
         border-radius: 10px;
-        box-shadow: 0 3px 10px rgba(0,0,0,.08);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, .08);
     }
 
     /* ================= TAB FIX ================= */
@@ -85,6 +85,7 @@
         background: #2563eb;
         border-radius: 2px;
     }
+
     /* =========================================== */
 
     .table-modern {
@@ -92,7 +93,8 @@
         border-collapse: collapse;
     }
 
-    .table-modern th, .table-modern td {
+    .table-modern th,
+    .table-modern td {
         padding: 12px 10px;
         border-bottom: 1px solid #eee;
     }
@@ -158,16 +160,16 @@
             @forelse($loans as $loan)
 
             @php
-                $today = now();
-                $jatuhTempo = $loan->tanggal_kembali;
+            $today = now();
+            $jatuhTempo = $loan->tanggal_kembali;
 
-                $telat = 0;
-                $denda = 0;
+            $telat = 0;
+            $denda = 0;
 
-                if ($today > $jatuhTempo) {
-                    $telat = $jatuhTempo->diffInDays($today);
-                    $denda = $telat * 1000;
-                }
+            if ($today > $jatuhTempo) {
+            $telat = $jatuhTempo->diffInDays($today, false);
+            $telat = abs((int)$telat);
+            }
             @endphp
 
             @if($denda > 0)

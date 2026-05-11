@@ -260,7 +260,7 @@
         <a href="#">Beranda</a>
         <a class="active">Bibliografi</a>
         <a href="#">Sirkulasi</a>
-        <a href="#">Keanggotaan</a>
+        <a href="/anggota">Keanggotaan</a>
 
         <form method="POST" action="/logout" style="margin-left:auto;">
             @csrf
@@ -281,8 +281,37 @@
             <div class="profile">
                 <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
                 <div>
-                    <b>Admin</b><br>
-                    <small>Pustakawan</small>
+
+                    <b>{{ Auth::user()->name }}</b><br>
+
+                    <small>
+
+                        Pustakawan
+
+                        @if(Auth::user()->is_online)
+
+                        <span style="
+                color:#4ade80;
+                font-weight:bold;
+                margin-left:5px;
+            ">
+                            ● Online
+                        </span>
+
+                        @else
+
+                        <span style="
+                color:#ef4444;
+                font-weight:bold;
+                margin-left:5px;
+            ">
+                            ● Offline
+                        </span>
+
+                        @endif
+
+                    </small>
+
                 </div>
             </div>
 

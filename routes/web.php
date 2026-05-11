@@ -7,6 +7,7 @@ use App\Http\Controllers\StaffDashboardController;
 use App\Http\Controllers\MahasiswaDashboardController;
 use App\Http\Controllers\DosenDashboardController;
 use App\Http\Controllers\SirkulasiController;
+use App\Http\Controllers\MemberController;
 
 
 // =======================
@@ -88,11 +89,11 @@ Route::middleware(['auth', 'role:mahasiswa'])->group(function () {
 
     Route::get('/mahasiswa/bayar/{id}', [SirkulasiController::class, 'halamanBayar'])->name('bayar');
 
-    Route::post('/midtrans/callback', [SirkulasiController::class, 'callback']);
-
     Route::get('/mahasiswa/denda', [SirkulasiController::class, 'halamanDenda']);
 
     Route::post('/mahasiswa/aktivasi-denda/{id}', [SirkulasiController::class, 'aktivasiDenda']);
+
+    Route::get('/mahasiswa/sejarah', [SirkulasiController::class, 'sejarah']);
 });
 
 
@@ -104,3 +105,13 @@ Route::middleware(['auth', 'role:dosen'])->group(function () {
 
     Route::get('/dosen/dashboard', [DosenDashboardController::class, 'index']);
 });
+
+Route::middleware(['auth', 'role:staff'])->group(function () {
+
+    Route::get('/anggota', [MemberController::class, 'index']);
+    Route::get('/anggota/{id}', [MemberController::class, 'show']);
+
+});
+
+Route::post('/payment/callback', [SirkulasiController::class, 'callback']);
+Route::post('/anggota/{id}/profile', [MemberController::class, 'saveProfile']);

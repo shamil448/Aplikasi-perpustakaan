@@ -48,8 +48,14 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
 
             $request->session()->regenerate();
+
             $user = Auth::user();
 
+            // UPDATE STATUS ONLINE
+            $user->is_online = true;
+            $user->save();
+
+            // REDIRECT ROLE
             if ($user->role === 'staff') {
                 return redirect('/staff/dashboard');
             }
@@ -68,8 +74,18 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        $user = Auth::user();
+
+        if ($user) {
+
+            $user->is_online = false;
+            $user->save();
+        }
+
         Auth::logout();
+
         $request->session()->invalidate();
+
         $request->session()->regenerateToken();
 
         return redirect('/login');

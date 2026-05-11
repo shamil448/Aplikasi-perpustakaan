@@ -211,23 +211,78 @@ class SirkulasiController extends Controller
 
         $notif = new \Midtrans\Notification();
 
+        $serverKey = config('midtrans.server_key');
+
+        // =========================
+        // VALIDASI SIGNATURE 🔐
+        // =========================
+        $hashed = hash(
+            'sha512',
+            $notif->order_id .
+                $notif->status_code .
+                $notif->gross_amount .
+                $serverKey
+        );
+
+        if ($hashed !== $notif->signature_key) {
+            \Log::error('Invalid signature dari Midtrans');
+            return response()->json(['error' => 'Invalid signature'], 403);
+        }
+
+        // =========================
+        // AMBIL ID LOAN
+        // =========================
         $orderId = $notif->order_id;
 
-        // ambil ID loan dari order_id
         preg_match('/LOAN-(\d+)-/', $orderId, $matches);
         $loanId = $matches[1] ?? null;
+
+        if (!$loanId) {
+            \Log::error('Loan ID tidak ditemukan dari order_id: ' . $orderId);
+            return response()->json(['error' => 'Loan ID tidak valid']);
+        }
 
         $loan = Loan::find($loanId);
 
         if (!$loan) {
+            \Log::error('Loan tidak ditemukan: ' . $loanId);
             return response()->json(['error' => 'Loan not found']);
         }
 
-        if (in_array($notif->transaction_status, ['settlement', 'capture'])) {
+        // =========================
+        // LOG DEBUG (WAJIB 🔥)
+        // =========================
+        \Log::info('MIDTRANS CALLBACK', [
+            'order_id' => $notif->order_id,
+            'status' => $notif->transaction_status,
+            'fraud_status' => $notif->fraud_status ?? null,
+            'gross_amount' => $notif->gross_amount,
+        ]);
+
+        // =========================
+        // HANDLE STATUS
+        // =========================
+        $transaction = $notif->transaction_status;
+        $fraud = $notif->fraud_status ?? null;
+
+        if ($transaction == 'capture') {
+            if ($fraud == 'challenge') {
+                // transaksi ditantang (jarang)
+                $loan->status = 'challenge';
+            } else {
+                $loan->status = 'lunas';
+                $loan->denda = 0;
+            }
+        } elseif ($transaction == 'settlement') {
             $loan->status = 'lunas';
             $loan->denda = 0;
-            $loan->save();
+        } elseif ($transaction == 'pending') {
+            $loan->status = 'pending';
+        } elseif (in_array($transaction, ['deny', 'expire', 'cancel'])) {
+            $loan->status = 'gagal';
         }
+
+        $loan->save();
 
         return response()->json(['success' => true]);
     }
@@ -261,5 +316,16 @@ class SirkulasiController extends Controller
         $loan->save();
 
         return redirect('/mahasiswa/denda')->with('success', 'Denda diaktifkan');
+    }
+
+    public function sejarah()
+    {
+        $loans = Loan::where('user_id', auth()->id())
+            ->whereIn('status', ['lunas', 'kembali'])
+            ->with('book', 'user')
+            ->latest()
+            ->get();
+
+        return view('mahasiswa.sejarah', compact('loans'));
     }
 }
