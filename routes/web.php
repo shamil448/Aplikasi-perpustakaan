@@ -115,3 +115,5 @@ Route::middleware(['auth', 'role:staff'])->group(function () {
 
 Route::post('/payment/callback', [SirkulasiController::class, 'callback']);
 Route::post('/anggota/{id}/profile', [MemberController::class, 'saveProfile']);
+// daftar eksemplar
+Route::get('/eksemplar', [BookController::class, 'daftarEksemplar']);

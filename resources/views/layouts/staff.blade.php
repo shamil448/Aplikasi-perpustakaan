@@ -320,7 +320,7 @@
             <a href="/books/create">Tambah Bibliografi Baru</a>
 
             <h4>EKSEMPLAR</h4>
-            <a href="#">Daftar Eksemplar</a>
+            <a href="/eksemplar">Daftar Eksemplar</a>
             <a href="#">Daftar Eksemplar Keluar</a>
 
         </div>

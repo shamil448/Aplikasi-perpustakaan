@@ -223,4 +223,22 @@ class BookController extends Controller
         return redirect('/books')
             ->with('success', 'Data eksemplar berhasil disimpan');
     }
+
+    // =============================
+    // DAFTAR EKSEMPLAR
+    // =============================
+    public function daftarEksemplar(Request $request)
+    {
+        $query = Book::query();
+
+        // pencarian kode eksemplar
+        if ($request->search) {
+
+            $query->where('eksemplar', 'like', '%' . $request->search . '%');
+        }
+
+        $books = $query->latest()->get();
+
+        return view('books.daftar-eksemplar', compact('books'));
+    }
 }
