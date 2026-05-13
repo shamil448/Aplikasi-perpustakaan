@@ -241,4 +241,20 @@ class BookController extends Controller
 
         return view('books.daftar-eksemplar', compact('books'));
     }
+
+    // =============================
+    // DAFTAR EKSEMPLAR KELUAR
+    // =============================
+    public function eksemplarKeluar(Request $request)
+    {
+        $books = collect();
+
+        if ($request->search) {
+
+            $books = Book::where('eksemplar', 'like', '%' . $request->search . '%')
+                ->get();
+        }
+
+        return view('books.eksemplar-keluar', compact('books'));
+    }
 }
