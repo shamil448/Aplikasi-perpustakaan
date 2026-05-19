@@ -257,4 +257,49 @@ class BookController extends Controller
 
         return view('books.eksemplar-keluar', compact('books'));
     }
+
+    // =============================
+    // DAFTAR BUKU SISWA
+    // =============================
+    public function daftarBuku(Request $request)
+    {
+        $query = Book::query();
+
+        // SEARCH
+        if ($request->search) {
+
+            // filter judul
+            if ($request->filter == 'judul') {
+
+                $query->where('judul', 'like', '%' . $request->search . '%');
+            }
+
+            // filter pengarang
+            elseif ($request->filter == 'pengarang') {
+
+                $query->where('pengarang', 'like', '%' . $request->search . '%');
+            }
+
+            // filter isbn
+            elseif ($request->filter == 'isbn') {
+
+                $query->where('isbn_issn', 'like', '%' . $request->search . '%');
+            }
+
+            // semua
+            else {
+
+                $query->where(function ($q) use ($request) {
+
+                    $q->where('judul', 'like', '%' . $request->search . '%')
+                        ->orWhere('pengarang', 'like', '%' . $request->search . '%')
+                        ->orWhere('isbn_issn', 'like', '%' . $request->search . '%');
+                });
+            }
+        }
+
+        $books = $query->latest()->get();
+
+        return view('books.daftar-buku', compact('books'));
+    }
 }

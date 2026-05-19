@@ -322,7 +322,7 @@
             <h4>EKSEMPLAR</h4>
             <a href="/eksemplar">Daftar Eksemplar</a>
             <a href="/eksemplar-keluar">Daftar Eksemplar Keluar</a>
-            <a href="#">Daftar Eksemplar Dipinjam</a>
+            <a href="#">Daftar Eksemplar Denda</a>
 
         </div>
 

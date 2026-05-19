@@ -119,3 +119,8 @@ Route::post('/anggota/{id}/profile', [MemberController::class, 'saveProfile']);
 Route::get('/eksemplar', [BookController::class, 'daftarEksemplar']);
 // daftar eksemplar keluar
 Route::get('/eksemplar-keluar', [BookController::class, 'eksemplarKeluar']);
+// =======================
+// DAFTAR BUKU SISWA
+// =======================
+
+Route::get('/daftar-buku', [BookController::class, 'daftarBuku']);
