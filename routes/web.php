@@ -124,3 +124,5 @@ Route::get('/eksemplar-keluar', [BookController::class, 'eksemplarKeluar']);
 // =======================
 
 Route::get('/daftar-buku', [BookController::class, 'daftarBuku']);
+Route::get('/eksemplar-denda', [BookController::class, 'eksemplarDenda']);
+Route::get('/staff/laporan-keuangan', [SirkulasiController::class, 'laporanKeuangan']);

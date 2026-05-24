@@ -122,93 +122,93 @@
 
     @if(!request('search'))
 
-    <div class="empty-box">
-        Cari kode eksemplar terlebih dahulu
-    </div>
+        <div class="empty-box">
+            Cari kode eksemplar terlebih dahulu
+        </div>
 
     @else
 
-    <table>
+        <table>
 
-        <tr>
-            <th width="120">SUNTING</th>
-            <th>KODE EKSEMPLAR</th>
-            <th>JUDUL BUKU</th>
-            <th width="180">ISBN / ISSN</th>
-            <th width="150">LOKASI</th>
-            <th width="140">STATUS</th>
-        </tr>
+            <tr>
+                <th width="120">SUNTING</th>
+                <th>KODE EKSEMPLAR</th>
+                <th>JUDUL BUKU</th>
+                <th width="180">ISBN / ISSN</th>
+                <th width="150">LOKASI</th>
+                <th width="140">STATUS</th>
+            </tr>
 
-        @forelse($books as $book)
+            @forelse($books as $book)
 
-        @php
+                @php
+                    $loan = \App\Models\Loan::where('kode_eksemplar', $book->eksemplar)
+                        ->whereIn('status', ['dipinjam', 'denda'])
+                        ->latest()
+                        ->first();
+                @endphp
 
-        $loan = \App\Models\Loan::where('kode_eksemplar', $book->eksemplar)
-                    ->latest()
-                    ->first();
+                @if($loan)
 
-        @endphp
+                    @php
+                        $today = now()->startOfDay();
+                        $jatuhTempo = \Carbon\Carbon::parse($loan->tanggal_kembali)->startOfDay();
 
-        @if($loan)
+                        $isDenda = $loan->status == 'denda' || $today->gt($jatuhTempo);
+                    @endphp
 
-        <tr>
+                    <tr>
 
-            <td>
-                <a href="/books/{{ $book->id }}/edit"
-                   class="btn btn-secondary">
-                    ✏️ Sunting
-                </a>
-            </td>
+                        <td>
+                            <a href="/books/{{ $book->id }}/edit"
+                               class="btn btn-secondary">
+                                ✏️ Sunting
+                            </a>
+                        </td>
 
-            <td>
-                {{ $book->eksemplar }}
-            </td>
+                        <td>
+                            {{ $book->eksemplar }}
+                        </td>
 
-            <td>
-                {{ $book->judul }}
-            </td>
+                        <td>
+                            {{ $book->judul }}
+                        </td>
 
-            <td>
-                {{ $book->isbn_issn }}
-            </td>
+                        <td>
+                            {{ $book->isbn_issn }}
+                        </td>
 
-            <td>
-                {{ $book->lokasi_rak ?: $book->lokasi }}
-            </td>
+                        <td>
+                            {{ $book->lokasi_rak ?: $book->lokasi }}
+                        </td>
 
-            <td>
+                        <td>
+                            @if($isDenda)
+                                <span class="status-denda">
+                                    Denda
+                                </span>
+                            @else
+                                <span class="status-dipinjam">
+                                    Dipinjam
+                                </span>
+                            @endif
+                        </td>
 
-                @if($loan->status == 'denda')
-
-                    <span class="status-denda">
-                        Denda
-                    </span>
-
-                @else
-
-                    <span class="status-dipinjam">
-                        Dipinjam
-                    </span>
+                    </tr>
 
                 @endif
 
-            </td>
+            @empty
 
-        </tr>
+                <tr>
+                    <td colspan="6">
+                        Data tidak ditemukan
+                    </td>
+                </tr>
 
-        @endif
+            @endforelse
 
-        @empty
-
-        <tr>
-            <td colspan="6">
-                Data tidak ditemukan
-            </td>
-        </tr>
-
-        @endforelse
-
-    </table>
+        </table>
 
     @endif
 

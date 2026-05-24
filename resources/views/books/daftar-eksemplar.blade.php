@@ -41,6 +41,30 @@
         color: black;
     }
 
+    .status-available {
+        background: #28a745;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+    }
+
+    .status-dipinjam {
+        background: #dc3545;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+    }
+
+    .status-denda {
+        background: #f59e0b;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+    }
+
     .card {
         background: white;
         padding: 20px;
@@ -106,19 +130,38 @@
             <th>JUDUL BUKU</th>
             <th width="180">ISBN / ISSN</th>
             <th width="180">LOKASI</th>
+            <th width="140">STATUS</th>
         </tr>
 
         @forelse($books as $book)
 
+        @php
+            $loan = \App\Models\Loan::where('kode_eksemplar', $book->eksemplar)
+                ->whereIn('status', ['dipinjam', 'denda'])
+                ->latest()
+                ->first();
+
+            $status = 'tersedia';
+
+            if ($loan) {
+                $today = now()->startOfDay();
+                $jatuhTempo = \Carbon\Carbon::parse($loan->tanggal_kembali)->startOfDay();
+
+                if ($loan->status == 'denda' || $today->gt($jatuhTempo)) {
+                    $status = 'denda';
+                } else {
+                    $status = 'dipinjam';
+                }
+            }
+        @endphp
+
         <tr>
 
             <td>
-
                 <a href="/books/{{ $book->id }}/edit"
                    class="btn btn-secondary">
                     ✏️ Sunting
                 </a>
-
             </td>
 
             <td>
@@ -137,12 +180,22 @@
                 {{ $book->lokasi_rak ?: $book->lokasi }}
             </td>
 
+            <td>
+                @if($status == 'denda')
+                    <span class="status-denda">Denda</span>
+                @elseif($status == 'dipinjam')
+                    <span class="status-dipinjam">Dipinjam</span>
+                @else
+                    <span class="status-available">Tersedia</span>
+                @endif
+            </td>
+
         </tr>
 
         @empty
 
         <tr>
-            <td colspan="5">
+            <td colspan="6">
                 Data eksemplar belum tersedia
             </td>
         </tr>

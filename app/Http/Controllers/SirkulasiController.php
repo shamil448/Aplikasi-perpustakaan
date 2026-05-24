@@ -46,8 +46,8 @@ class SirkulasiController extends Controller
             return back()->with('error', 'Batas buku dipinjam hanya 2 buah');
         }
 
-        $tanggalPinjam = Carbon::now();
-        $tanggalKembali = Carbon::now()->addDays(7);
+        $tanggalPinjam = Carbon::today();
+        $tanggalKembali = Carbon::today()->addDays(2);
 
         Loan::create([
             'user_id' => auth()->id(),
@@ -105,11 +105,11 @@ class SirkulasiController extends Controller
             return back()->with('error', 'Tidak bisa diperpanjang karena sudah lewat jatuh tempo');
         }
 
-        $loan->tanggal_kembali = Carbon::parse($loan->tanggal_kembali)->addDays(7);
+        $loan->tanggal_kembali = Carbon::parse($loan->tanggal_kembali)->addDays(2);
         $loan->is_extended = true;
         $loan->save();
 
-        return back()->with('success', 'Berhasil diperpanjang 7 hari');
+        return back()->with('success', 'Berhasil diperpanjang 2 hari');
     }
 
 
@@ -151,10 +151,10 @@ class SirkulasiController extends Controller
         }
 
         // =========================
-        // HITUNG DENDA
+        // HITUNG DENDA BERDASARKAN TANGGAL SAJA
         // =========================
-        $today = now();
-        $jatuhTempo = $loan->tanggal_kembali;
+        $today = now()->startOfDay();
+        $jatuhTempo = Carbon::parse($loan->tanggal_kembali)->startOfDay();
 
         $denda = 0;
 
@@ -162,6 +162,10 @@ class SirkulasiController extends Controller
             $telatHari = $jatuhTempo->diffInDays($today);
             $denda = $telatHari * 1000;
         }
+
+        // simpan nominal denda terbaru ke database
+        $loan->denda = $denda;
+        $loan->save();
 
         // =========================
         // VALIDASI DENDA
@@ -171,7 +175,7 @@ class SirkulasiController extends Controller
         }
 
         // =========================
-        // CONFIG MIDTRANS (HARD FIX 🔥)
+        // CONFIG MIDTRANS
         // =========================
         Config::$serverKey = config('midtrans.server_key');
         Config::$isProduction = config('midtrans.is_production');
@@ -206,83 +210,73 @@ class SirkulasiController extends Controller
 
     public function callback(Request $request)
     {
-        \Midtrans\Config::$serverKey = config('midtrans.server_key');
-        \Midtrans\Config::$isProduction = config('midtrans.is_production');
-
-        $notif = new \Midtrans\Notification();
+        \Log::info('MIDTRANS CALLBACK MASUK', $request->all());
 
         $serverKey = config('midtrans.server_key');
 
-        // =========================
-        // VALIDASI SIGNATURE 🔐
-        // =========================
-        $hashed = hash(
-            'sha512',
-            $notif->order_id .
-                $notif->status_code .
-                $notif->gross_amount .
-                $serverKey
-        );
+        $orderId = $request->order_id;
+        $statusCode = $request->status_code;
+        $grossAmount = $request->gross_amount;
+        $signatureKey = $request->signature_key;
 
-        if ($hashed !== $notif->signature_key) {
-            \Log::error('Invalid signature dari Midtrans');
+        $hashed = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+
+        if ($hashed !== $signatureKey) {
+            \Log::error('Invalid signature dari Midtrans', [
+                'order_id' => $orderId,
+                'gross_amount' => $grossAmount,
+            ]);
+
             return response()->json(['error' => 'Invalid signature'], 403);
         }
-
-        // =========================
-        // AMBIL ID LOAN
-        // =========================
-        $orderId = $notif->order_id;
 
         preg_match('/LOAN-(\d+)-/', $orderId, $matches);
         $loanId = $matches[1] ?? null;
 
         if (!$loanId) {
-            \Log::error('Loan ID tidak ditemukan dari order_id: ' . $orderId);
-            return response()->json(['error' => 'Loan ID tidak valid']);
+            return response()->json(['error' => 'Loan ID tidak valid'], 400);
         }
 
         $loan = Loan::find($loanId);
 
         if (!$loan) {
-            \Log::error('Loan tidak ditemukan: ' . $loanId);
-            return response()->json(['error' => 'Loan not found']);
+            return response()->json(['error' => 'Loan not found'], 404);
         }
 
-        // =========================
-        // LOG DEBUG (WAJIB 🔥)
-        // =========================
-        \Log::info('MIDTRANS CALLBACK', [
-            'order_id' => $notif->order_id,
-            'status' => $notif->transaction_status,
-            'fraud_status' => $notif->fraud_status ?? null,
-            'gross_amount' => $notif->gross_amount,
+        $transaction = $request->transaction_status;
+        $fraud = $request->fraud_status ?? null;
+
+        \Log::info('MIDTRANS STATUS', [
+            'loan_id' => $loan->id,
+            'status_lama' => $loan->status,
+            'transaction' => $transaction,
+            'fraud' => $fraud,
         ]);
 
-        // =========================
-        // HANDLE STATUS
-        // =========================
-        $transaction = $notif->transaction_status;
-        $fraud = $notif->fraud_status ?? null;
-
-        if ($transaction == 'capture') {
-            if ($fraud == 'challenge') {
-                // transaksi ditantang (jarang)
-                $loan->status = 'challenge';
-            } else {
-                $loan->status = 'lunas';
-                $loan->denda = 0;
-            }
-        } elseif ($transaction == 'settlement') {
+        if ($transaction === 'settlement') {
+            $loan->denda_dibayar = $loan->denda;
             $loan->status = 'lunas';
             $loan->denda = 0;
-        } elseif ($transaction == 'pending') {
-            $loan->status = 'pending';
-        } elseif (in_array($transaction, ['deny', 'expire', 'cancel'])) {
-            $loan->status = 'gagal';
+            $loan->save();
         }
 
-        $loan->save();
+        if ($transaction === 'capture') {
+            if ($fraud === 'accept' || $fraud === null) {
+                $loan->status = 'lunas';
+                $loan->denda = 0;
+                $loan->save();
+            }
+        }
+
+        if ($transaction === 'pending') {
+            $loan->status = 'denda';
+            $loan->save();
+        }
+
+        if (in_array($transaction, ['deny', 'expire', 'cancel'])) {
+            $loan->status = 'denda';
+            $loan->save();
+        }
 
         return response()->json(['success' => true]);
     }
@@ -327,5 +321,15 @@ class SirkulasiController extends Controller
             ->get();
 
         return view('mahasiswa.sejarah', compact('loans'));
+    }
+
+    public function laporanKeuangan()
+    {
+        $loans = Loan::where('status', 'lunas')
+            ->with(['book', 'user'])
+            ->latest()
+            ->get();
+
+        return view('staff.laporan-keuangan', compact('loans'));
     }
 }

@@ -322,7 +322,10 @@
             <h4>EKSEMPLAR</h4>
             <a href="/eksemplar">Daftar Eksemplar</a>
             <a href="/eksemplar-keluar">Daftar Eksemplar Keluar</a>
-            <a href="#">Daftar Eksemplar Denda</a>
+            <a href="/eksemplar-denda">Daftar Eksemplar Denda</a>
+
+            <h4>LAINNYA</h4>
+            <a href="/staff/laporan-keuangan">Laporan Keuangan</a>
 
         </div>
 

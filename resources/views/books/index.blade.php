@@ -18,6 +18,14 @@
         border-radius: 6px;
         font-size: 12px;
     }
+
+    .status-denda {
+        background: #f59e0b;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+    }
 </style>
 
 <div class="page-header">
@@ -176,15 +184,31 @@
                 {{-- STATUS --}}
                 <td>
                     @php
-                    $dipinjam = \App\Models\Loan::where('kode_eksemplar', $book->eksemplar)
-                    ->where('status', 'dipinjam')
-                    ->exists();
+                        $loan = \App\Models\Loan::where('kode_eksemplar', $book->eksemplar)
+                            ->whereIn('status', ['dipinjam', 'denda'])
+                            ->latest()
+                            ->first();
+
+                        $status = 'tersedia';
+
+                        if ($loan) {
+                            $today = now()->startOfDay();
+                            $jatuhTempo = \Carbon\Carbon::parse($loan->tanggal_kembali)->startOfDay();
+
+                            if ($loan->status == 'denda' || $today->gt($jatuhTempo)) {
+                                $status = 'denda';
+                            } else {
+                                $status = 'dipinjam';
+                            }
+                        }
                     @endphp
 
-                    @if($dipinjam)
-                    <span class="status-empty">Dipinjam</span>
+                    @if($status == 'denda')
+                        <span class="status-denda">Denda</span>
+                    @elseif($status == 'dipinjam')
+                        <span class="status-empty">Dipinjam</span>
                     @else
-                    <span class="status-available">Tersedia</span>
+                        <span class="status-available">Tersedia</span>
                     @endif
                 </td>
 

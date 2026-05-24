@@ -16,7 +16,8 @@ class Loan extends Model
 
         // tambahan baru
         'is_extended',
-        'denda'
+        'denda',
+        'denda_dibayar'
     ];
 
     protected $casts = [

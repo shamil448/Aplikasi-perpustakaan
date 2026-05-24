@@ -50,7 +50,6 @@
         box-shadow: 0 3px 10px rgba(0, 0, 0, .08);
     }
 
-    /* ================= TAB ================= */
     .tabs {
         display: flex;
         gap: 25px;
@@ -86,7 +85,6 @@
         border-radius: 2px;
     }
 
-    /* BADGE NOTIF */
     .badge {
         background: #dc2626;
         color: white;
@@ -97,7 +95,6 @@
         font-weight: 600;
     }
 
-    /* ================= TABLE ================= */
     .table-modern {
         width: 100%;
         border-collapse: collapse;
@@ -135,6 +132,7 @@
         font-size: 12px;
         display: inline-block;
         text-decoration: none;
+        margin-bottom: 5px;
     }
 
     .btn-green {
@@ -147,47 +145,54 @@
 </style>
 
 @php
-$dendaCount = 0;
+    $todayGlobal = now()->startOfDay();
+    $dendaCount = 0;
 
-foreach ($loans as $loan) {
-if (now() > $loan->tanggal_kembali) {
-$dendaCount++;
-}
-}
+    foreach ($loans as $item) {
+        $jatuhTempoItem = \Carbon\Carbon::parse($item->tanggal_kembali)->startOfDay();
+
+        if ($todayGlobal->gt($jatuhTempoItem)) {
+            $dendaCount++;
+        }
+    }
 @endphp
 
 <div class="wrapper">
 
-    <!-- SIDEBAR -->
     <div class="sirkulasi">
         <h3>SIRKULASI</h3>
+
         <div class="menu">
             <a href="/mahasiswa/sirkulasi">Mulai Transaksi</a>
             <a>Pengembalian Kilat</a>
             <a>Aturan Peminjaman</a>
-            <a class="active">Sejarah Peminjaman</a>
+            <a href="/mahasiswa/sejarah">Sejarah Peminjaman</a>
             <a>Peringatan Jatuh Tempo</a>
             <a>Daftar Keterlambatan</a>
             <a>Reservasi</a>
         </div>
     </div>
 
-    <!-- KONTEN -->
     <div class="transaksi">
 
         <div class="tabs">
             <a href="/mahasiswa/sirkulasi">Peminjaman (F2)</a>
-            <a class="active">Pinjaman Saat Ini (F3)</a>
+
+            <a href="/mahasiswa/pinjaman" class="active">
+                Pinjaman Saat Ini (F3)
+            </a>
+
             <a>Reservasi (F4)</a>
 
             <a href="/mahasiswa/denda">
                 Denda (F9)
+
                 @if($dendaCount > 0)
-                <span class="badge">{{ $dendaCount }}</span>
+                    <span class="badge">{{ $dendaCount }}</span>
                 @endif
             </a>
 
-            <a href="/mahasiswa/sejarah" class="active">Sejarah Peminjaman (F10)</a>
+            <a href="/mahasiswa/sejarah">Sejarah Peminjaman (F10)</a>
         </div>
 
         <h3 style="margin-bottom:20px;">Pinjaman Saat Ini</h3>
@@ -205,72 +210,74 @@ $dendaCount++;
 
             @forelse($loans as $loan)
 
-            @php
-            $today = now();
-            $jatuhTempo = $loan->tanggal_kembali;
+                @php
+                    $today = now()->startOfDay();
+                    $jatuhTempo = \Carbon\Carbon::parse($loan->tanggal_kembali)->startOfDay();
 
-            $denda = 0;
+                    $telatHari = 0;
+                    $denda = 0;
 
-            if ($today > $jatuhTempo) {
-            $telatHari = $jatuhTempo->diffInDays($today);
-            $denda = $telatHari * 1000;
-            }
-            @endphp
+                    if ($today->gt($jatuhTempo)) {
+                        $telatHari = $jatuhTempo->diffInDays($today);
+                        $denda = $telatHari * 1000;
 
-            <tr>
-                <td>{{ $loan->kode_eksemplar }}</td>
-                <td>{{ $loan->book->judul }}</td>
-                <td>{{ $loan->tanggal_pinjam->format('d M Y') }}</td>
-                <td>{{ $loan->tanggal_kembali->format('d M Y') }}</td>
+                        // update database supaya nominal denda ikut naik
+                        if ($loan->denda != $denda) {
+                            $loan->denda = $denda;
+                            $loan->save();
+                        }
+                    }
 
-                <td>
-                    @if($denda > 0)
-                    <span style="color:#dc2626;font-weight:600;">
-                        Rp {{ number_format($denda) }}
-                    </span>
-                    @else
-                    -
-                    @endif
-                </td>
+                    $besokJatuhTempo = $today->copy()->addDay()->isSameDay($jatuhTempo);
+                @endphp
 
-                <td>
+                <tr>
+                    <td>{{ $loan->kode_eksemplar }}</td>
+                    <td>{{ $loan->book->judul }}</td>
+                    <td>{{ $loan->tanggal_pinjam->format('d M Y') }}</td>
+                    <td>{{ $loan->tanggal_kembali->format('d M Y') }}</td>
 
-                    @if(
-                    !$loan->is_extended &&
-                    $today->format('Y-m-d') ==
-                    \Carbon\Carbon::parse($loan->tanggal_kembali)
-                    ->subDay()
-                    ->format('Y-m-d')
-                    )
+                    <td>
+                        @if($denda > 0)
+                            <span style="color:#dc2626;font-weight:600;">
+                                Rp {{ number_format($denda, 0, ',', '.') }}
+                            </span>
+                        @else
+                            -
+                        @endif
+                    </td>
 
-                    <form method="POST" action="/mahasiswa/perpanjang/{{ $loan->id }}">
-                        @csrf
+                    <td>
+                        @if(!$loan->is_extended && $besokJatuhTempo)
+                            <form method="POST" action="/mahasiswa/perpanjang/{{ $loan->id }}">
+                                @csrf
 
-                        <button class="btn btn-green">
-                            Perpanjang 7 Hari
-                        </button>
-                    </form>
+                                <button type="submit" class="btn btn-green">
+                                    Perpanjang 2 Hari
+                                </button>
+                            </form>
+                        @endif
 
-                    @endif
+                        @if($denda > 0)
+                            <form method="POST" action="/mahasiswa/aktivasi-denda/{{ $loan->id }}">
+                                @csrf
 
-                    @if($today > $jatuhTempo)
-                    <form method="POST" action="/mahasiswa/aktivasi-denda/{{ $loan->id }}">
-                        @csrf
-                        <button class="btn btn-red">
-                            Aktivasi Denda
-                        </button>
-                    </form>
-                    @endif
-
-                </td>
-            </tr>
+                                <button type="submit" class="btn btn-red">
+                                    Aktivasi Denda
+                                </button>
+                            </form>
+                        @endif
+                    </td>
+                </tr>
 
             @empty
-            <tr>
-                <td colspan="6" class="empty">
-                    Tidak ada buku yang sedang dipinjam
-                </td>
-            </tr>
+
+                <tr>
+                    <td colspan="6" class="empty">
+                        Tidak ada buku yang sedang dipinjam
+                    </td>
+                </tr>
+
             @endforelse
 
         </table>

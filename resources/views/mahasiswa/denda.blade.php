@@ -160,15 +160,15 @@
             @forelse($loans as $loan)
 
             @php
-            $today = now();
-            $jatuhTempo = $loan->tanggal_kembali;
+            $today = now()->startOfDay();
+            $jatuhTempo = \Carbon\Carbon::parse($loan->tanggal_kembali)->startOfDay();
 
             $telat = 0;
             $denda = 0;
 
             if ($today > $jatuhTempo) {
-            $telat = $jatuhTempo->diffInDays($today, false);
-            $telat = abs((int)$telat);
+            $telat = $jatuhTempo->diffInDays($today);
+            $denda = $telat * 1000;
             }
             @endphp
 
