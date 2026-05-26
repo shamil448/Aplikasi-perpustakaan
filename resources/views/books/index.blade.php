@@ -26,6 +26,25 @@
         border-radius: 6px;
         font-size: 12px;
     }
+
+    .kategori-badge {
+        background: #e0e7ff;
+        color: #3730a3;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        display: inline-block;
+        margin-top: 6px;
+        text-transform: capitalize;
+    }
+
+    .sinopsis-text {
+        font-size: 12px;
+        color: #666;
+        margin-top: 6px;
+        max-width: 420px;
+        line-height: 1.4;
+    }
 </style>
 
 <div class="page-header">
@@ -56,10 +75,11 @@
             value="{{ request('search') }}">
 
         <select class="search-select" name="field">
-            <option value="all">Semua Ruas</option>
-            <option value="judul">Judul</option>
-            <option value="pengarang">Pengarang</option>
-            <option value="isbn_issn">ISBN</option>
+            <option value="all" {{ request('field') == 'all' ? 'selected' : '' }}>Semua Ruas</option>
+            <option value="judul" {{ request('field') == 'judul' ? 'selected' : '' }}>Judul</option>
+            <option value="pengarang" {{ request('field') == 'pengarang' ? 'selected' : '' }}>Pengarang</option>
+            <option value="isbn_issn" {{ request('field') == 'isbn_issn' ? 'selected' : '' }}>ISBN</option>
+            <option value="kategori" {{ request('field') == 'kategori' ? 'selected' : '' }}>Kategori</option>
         </select>
 
         <button class="btn btn-gray" type="submit">
@@ -104,6 +124,7 @@
                 <th width="40">HAPUS</th>
                 <th width="120">AKSI</th>
                 <th>JUDUL</th>
+                <th width="140">KATEGORI</th>
                 <th width="150">ISBN / ISSN</th>
                 <th width="120">STATUS</th>
                 <th width="180">EKSEMPLAR</th>
@@ -149,11 +170,11 @@
 
                         @if($book->gambar)
 
-                        <img class="book-cover" src="{{ asset('storage/'.$book->gambar) }}">
+                            <img class="book-cover" src="{{ asset('storage/'.$book->gambar) }}">
 
                         @else
 
-                        <img class="book-cover" src="https://via.placeholder.com/60x80">
+                            <img class="book-cover" src="https://via.placeholder.com/60x80">
 
                         @endif
 
@@ -171,10 +192,24 @@
                                 {{ $book->tempat_terbit }} - {{ $book->tahun_terbit }}
                             </div>
 
+                            <div class="sinopsis-text">
+                                {{ $book->sinopsis ? Str::limit($book->sinopsis, 120) : 'Sinopsis belum tersedia' }}
+                            </div>
+
                         </div>
 
                     </div>
 
+                </td>
+
+                <td>
+                    @if($book->kategori)
+                        <span class="kategori-badge">
+                            {{ $book->kategori }}
+                        </span>
+                    @else
+                        -
+                    @endif
                 </td>
 
                 <td>

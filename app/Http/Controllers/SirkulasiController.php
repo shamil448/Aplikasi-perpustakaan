@@ -254,14 +254,28 @@ class SirkulasiController extends Controller
         ]);
 
         if ($transaction === 'settlement') {
-            $loan->denda_dibayar = $loan->denda;
+
+            $jumlahDenda = $loan->denda > 0
+                ? $loan->denda
+                : $loan->denda_dibayar;
+
+            $loan->denda_dibayar = $jumlahDenda;
+            $loan->tanggal_bayar = now('Asia/Jakarta');
             $loan->status = 'lunas';
             $loan->denda = 0;
             $loan->save();
         }
 
         if ($transaction === 'capture') {
+
             if ($fraud === 'accept' || $fraud === null) {
+
+                $jumlahDenda = $loan->denda > 0
+                    ? $loan->denda
+                    : $loan->denda_dibayar;
+
+                $loan->denda_dibayar = $jumlahDenda;
+                $loan->tanggal_bayar = now('Asia/Jakarta');
                 $loan->status = 'lunas';
                 $loan->denda = 0;
                 $loan->save();
@@ -330,6 +344,8 @@ class SirkulasiController extends Controller
             ->latest()
             ->get();
 
-        return view('staff.laporan-keuangan', compact('loans'));
+        $totalDendaLunas = $loans->sum('denda_dibayar');
+
+        return view('staff.laporan-keuangan', compact('loans', 'totalDendaLunas'));
     }
 }

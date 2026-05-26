@@ -128,6 +128,7 @@
             <th width="120">SUNTING</th>
             <th>KODE EKSEMPLAR</th>
             <th>JUDUL BUKU</th>
+            <th width="170">KATEGORI</th>
             <th width="180">ISBN / ISSN</th>
             <th width="180">LOKASI</th>
             <th width="140">STATUS</th>
@@ -173,6 +174,10 @@
             </td>
 
             <td>
+                {{ $book->kategori ? ucwords($book->kategori) : '-' }}
+            </td>
+
+            <td>
                 {{ $book->isbn_issn }}
             </td>
 
@@ -195,7 +200,7 @@
         @empty
 
         <tr>
-            <td colspan="6">
+            <td colspan="7">
                 Data eksemplar belum tersedia
             </td>
         </tr>

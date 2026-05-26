@@ -64,24 +64,8 @@
 </div>
 
 @php
-    $total = 0;
+    $total = $loans->sum('denda_dibayar');
 @endphp
-
-@foreach($loans as $loan)
-    @php
-        $today = now()->startOfDay();
-        $jatuhTempo = \Carbon\Carbon::parse($loan->tanggal_kembali)->startOfDay();
-
-        $dendaTampil = $loan->denda_dibayar ?? 0;
-
-        if ($dendaTampil <= 0 && $today->gt($jatuhTempo)) {
-            $telat = $jatuhTempo->diffInDays($today);
-            $dendaTampil = $telat * 1000;
-        }
-
-        $total += $dendaTampil;
-    @endphp
-@endforeach
 
 <div class="total-box">
     Total Denda Lunas: Rp {{ number_format($total, 0, ',', '.') }}
@@ -95,31 +79,23 @@
             <th>Nama Buku</th>
             <th>Tanggal Pinjam</th>
             <th>Tanggal Kembali</th>
-            <th>Jumlah Denda</th>
+            <th>Tanggal Bayar</th>
+            <th>Jumlah Denda Dibayar</th>
             <th>Status</th>
         </tr>
 
         @forelse($loans as $loan)
-
-            @php
-                $today = now()->startOfDay();
-                $jatuhTempo = \Carbon\Carbon::parse($loan->tanggal_kembali)->startOfDay();
-
-                $dendaTampil = $loan->denda_dibayar ?? 0;
-
-                if ($dendaTampil <= 0 && $today->gt($jatuhTempo)) {
-                    $telat = $jatuhTempo->diffInDays($today);
-                    $dendaTampil = $telat * 1000;
-                }
-            @endphp
 
             <tr>
                 <td>{{ $loan->user->name }}</td>
                 <td>{{ $loan->book->judul }}</td>
                 <td>{{ $loan->tanggal_pinjam->format('d M Y') }}</td>
                 <td>{{ $loan->tanggal_kembali->format('d M Y') }}</td>
+                <td>
+                    {{ $loan->tanggal_bayar ? $loan->tanggal_bayar->format('d M Y H:i') : '-' }}
+                </td>
                 <td style="color:#16a34a;font-weight:600;">
-                    Rp {{ number_format($dendaTampil, 0, ',', '.') }}
+                    Rp {{ number_format($loan->denda_dibayar, 0, ',', '.') }}
                 </td>
                 <td>
                     <span class="status-lunas">Lunas</span>
@@ -129,7 +105,7 @@
         @empty
 
             <tr>
-                <td colspan="6" class="empty">
+                <td colspan="7" class="empty">
                     Belum ada pembayaran denda yang lunas
                 </td>
             </tr>

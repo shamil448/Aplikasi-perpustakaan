@@ -111,6 +111,11 @@
         font-weight: 600;
     }
 
+    .denda-dibayar {
+        color: #16a34a;
+        font-weight: 600;
+    }
+
     .empty {
         text-align: center;
         padding: 20px;
@@ -120,7 +125,6 @@
 
 <div class="wrapper">
 
-    <!-- SIDEBAR -->
     <div class="sirkulasi">
         <h3>SIRKULASI</h3>
         <div class="menu">
@@ -134,7 +138,6 @@
         </div>
     </div>
 
-    <!-- KONTEN -->
     <div class="transaksi">
 
         <div class="tabs">
@@ -154,6 +157,8 @@
                 <th>Judul Buku</th>
                 <th>Tanggal Pinjam</th>
                 <th>Tanggal Kembali</th>
+                <th>Tanggal Bayar</th>
+                <th>Denda Dibayar</th>
                 <th>Status</th>
             </tr>
 
@@ -165,16 +170,28 @@
                 <td>{{ $loan->tanggal_kembali->format('d M Y') }}</td>
 
                 <td>
-                    @if($loan->status == 'lunas')
-                    <span class="status-lunas">Lunas</span>
+                    @if($loan->tanggal_bayar)
+                        {{ $loan->tanggal_bayar->format('d M Y') }}
                     @else
-                    <span class="status-kembali">Kembali</span>
+                        -
+                    @endif
+                </td>
+
+                <td class="denda-dibayar">
+                    Rp {{ number_format($loan->denda_dibayar ?? 0, 0, ',', '.') }}
+                </td>
+
+                <td>
+                    @if($loan->status == 'lunas')
+                        <span class="status-lunas">Lunas</span>
+                    @else
+                        <span class="status-kembali">Kembali</span>
                     @endif
                 </td>
             </tr>
             @empty
             <tr>
-                <td colspan="5" class="empty">
+                <td colspan="7" class="empty">
                     Belum ada riwayat peminjaman
                 </td>
             </tr>

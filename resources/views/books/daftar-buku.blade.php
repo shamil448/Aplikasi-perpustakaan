@@ -126,7 +126,7 @@
             font-size: 13px;
         }
 
-        .eksemplar-box {
+        .kategori-box {
             background: #eff6ff;
             padding: 7px 12px;
             border-radius: 6px;
@@ -168,7 +168,9 @@
                     name="filter"
                     class="search-select">
 
-                    <option value="all">Semua</option>
+                    <option value="all" {{ request('filter') == 'all' ? 'selected' : '' }}>
+                        Semua
+                    </option>
 
                     <option
                         value="judul"
@@ -186,6 +188,12 @@
                         value="isbn"
                         {{ request('filter') == 'isbn' ? 'selected' : '' }}>
                         ISBN
+                    </option>
+
+                    <option
+                        value="kategori"
+                        {{ request('filter') == 'kategori' ? 'selected' : '' }}>
+                        Kategori
                     </option>
 
                 </select>
@@ -211,7 +219,7 @@
                     <th>Judul</th>
                     <th width="220">ISBN / ISSN</th>
                     <th width="180">Status</th>
-                    <th width="180">Eksemplar</th>
+                    <th width="180">Kategori</th>
                 </tr>
 
                 @forelse($books as $book)
@@ -223,15 +231,15 @@
 
                         @if($book->gambar)
 
-                        <img
-                            src="{{ asset('storage/'.$book->gambar) }}"
-                            class="book-cover">
+                            <img
+                                src="{{ asset('storage/'.$book->gambar) }}"
+                                class="book-cover">
 
                         @else
 
-                        <img
-                            src="https://via.placeholder.com/70x95"
-                            class="book-cover">
+                            <img
+                                src="https://via.placeholder.com/70x95"
+                                class="book-cover">
 
                         @endif
 
@@ -259,41 +267,33 @@
                     <td>
 
                         @php
-                        $dipinjam = \App\Models\Loan::where('kode_eksemplar', $book->eksemplar)
-                        ->where('status', 'dipinjam')
-                        ->exists();
+                            $dipinjam = \App\Models\Loan::where('kode_eksemplar', $book->eksemplar)
+                                ->whereIn('status', ['dipinjam', 'denda'])
+                                ->exists();
                         @endphp
 
                         @if($dipinjam)
 
-                        <span class="status-borrowed">
-                            Dipinjam
-                        </span>
+                            <span class="status-borrowed">
+                                Dipinjam
+                            </span>
 
                         @else
 
-                        <span class="status-available">
-                            Tersedia
-                        </span>
+                            <span class="status-available">
+                                Tersedia
+                            </span>
 
                         @endif
 
                     </td>
 
-                    {{-- EKSEMPLAR --}}
+                    {{-- KATEGORI --}}
                     <td>
 
-                        @if($book->eksemplar)
-
-                        <div class="eksemplar-box">
-                            {{ $book->eksemplar }}
+                        <div class="kategori-box">
+                            {{ $book->kategori ? ucwords($book->kategori) : '-' }}
                         </div>
-
-                        @else
-
-                        -
-
-                        @endif
 
                     </td>
 

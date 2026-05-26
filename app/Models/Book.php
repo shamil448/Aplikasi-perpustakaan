@@ -8,6 +8,8 @@ class Book extends Model
 {
     protected $fillable = [
         'judul',
+        'kategori',
+        'sinopsis',
         'pengarang',
         'edisi',
         'isbn_issn',
@@ -22,7 +24,7 @@ class Book extends Model
         'lokasi_rak',
         'eksemplar',
 
-        'gambar'
+        'gambar',
     ];
 
     public function loans()

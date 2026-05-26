@@ -4,11 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\MemberProfile;
 use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    // Form Register
+    // FORM REGISTER
     public function showRegister()
     {
         return view('auth.register');
@@ -18,20 +19,37 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6',
-            'role' => 'required|in:staff,mahasiswa,dosen'
+            'name' => 'required|string|max:255',
+
+            'username' => 'required|string|max:255|unique:users,username',
+
+            'nim_nidn' => 'required|string|max:255',
+
+            'nomor_hp' => 'required|string|max:20',
+
+            'password' => 'required|string|min:6',
+
+            'role' => 'required|in:staff,mahasiswa,dosen',
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $request->name,
-            'email' => $request->email,
+            'username' => $request->username,
+
+            // email tetap diisi dummy karena kolom email di database masih required + unique
+            'email' => $request->username . '@perpus.local',
+
             'password' => $request->password,
-            'role' => $request->role
+            'role' => $request->role,
         ]);
 
-        return redirect('/login');
+        MemberProfile::create([
+            'user_id' => $user->id,
+            'nim_nidn' => $request->nim_nidn,
+            'nomor_hp' => $request->nomor_hp,
+        ]);
+
+        return redirect('/login')->with('success', 'Register berhasil, silakan login');
     }
 
     // FORM LOGIN
@@ -43,7 +61,15 @@ class AuthController extends Controller
     // PROSES LOGIN
     public function login(Request $request)
     {
-        $credentials = $request->only('name', 'password');
+        $request->validate([
+            'username' => 'required|string',
+            'password' => 'required|string',
+        ]);
+
+        $credentials = [
+            'username' => $request->username,
+            'password' => $request->password,
+        ];
 
         if (Auth::attempt($credentials)) {
 
@@ -51,11 +77,9 @@ class AuthController extends Controller
 
             $user = Auth::user();
 
-            // UPDATE STATUS ONLINE
             $user->is_online = true;
             $user->save();
 
-            // REDIRECT ROLE
             if ($user->role === 'staff') {
                 return redirect('/staff/dashboard');
             }
@@ -67,17 +91,21 @@ class AuthController extends Controller
             if ($user->role === 'dosen') {
                 return redirect('/dosen/dashboard');
             }
+
+            return redirect('/login');
         }
 
-        return back()->with('error', 'Login Gagal');
+        return back()
+            ->withInput()
+            ->with('error', 'Username atau kata sandi salah');
     }
 
+    // LOGOUT
     public function logout(Request $request)
     {
         $user = Auth::user();
 
         if ($user) {
-
             $user->is_online = false;
             $user->save();
         }
@@ -85,7 +113,6 @@ class AuthController extends Controller
         Auth::logout();
 
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
         return redirect('/login');

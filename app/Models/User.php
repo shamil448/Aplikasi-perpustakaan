@@ -13,10 +13,11 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name',
+        'username',
         'email',
         'password',
         'role',
-        'is_online'
+        'is_online',
     ];
 
     protected $hidden = [
@@ -28,11 +29,17 @@ class User extends Authenticatable
     {
         return [
             'password' => 'hashed',
+            'is_online' => 'boolean',
         ];
     }
 
     public function profile()
     {
         return $this->hasOne(MemberProfile::class);
+    }
+
+    public function loans()
+    {
+        return $this->hasMany(Loan::class);
     }
 }

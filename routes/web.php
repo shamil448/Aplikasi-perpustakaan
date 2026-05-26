@@ -31,6 +31,9 @@ Route::middleware(['auth', 'role:staff'])->group(function () {
     // dashboard staff
     Route::get('/staff/dashboard', [StaffDashboardController::class, 'index']);
 
+    // laporan keuangan
+    Route::get('/staff/laporan-keuangan', [SirkulasiController::class, 'laporanKeuangan']);
+
     // =======================
     // BIBLIOGRAFI (BUKU)
     // =======================
@@ -61,6 +64,19 @@ Route::middleware(['auth', 'role:staff'])->group(function () {
 
     // simpan eksemplar
     Route::post('/books/{id}/eksemplar', [BookController::class, 'storeEksemplar']);
+
+    // daftar eksemplar
+    Route::get('/eksemplar', [BookController::class, 'daftarEksemplar']);
+
+    // daftar eksemplar keluar
+    Route::get('/eksemplar-keluar', [BookController::class, 'eksemplarKeluar']);
+
+    // daftar eksemplar denda
+    Route::get('/eksemplar-denda', [BookController::class, 'eksemplarDenda']);
+
+    // anggota
+    Route::get('/anggota', [MemberController::class, 'index']);
+    Route::get('/anggota/{id}', [MemberController::class, 'show']);
 });
 
 
@@ -81,18 +97,25 @@ Route::middleware(['auth', 'role:mahasiswa'])->group(function () {
     // proses peminjaman buku
     Route::post('/mahasiswa/pinjam', [SirkulasiController::class, 'pinjam']);
 
+    // pinjaman saat ini
     Route::get('/mahasiswa/pinjaman', [SirkulasiController::class, 'pinjamanSaatIni']);
 
+    // perpanjang
     Route::post('/mahasiswa/perpanjang/{id}', [SirkulasiController::class, 'perpanjang']);
 
+    // hitung denda
     Route::post('/mahasiswa/denda/{id}', [SirkulasiController::class, 'denda']);
 
+    // halaman bayar
     Route::get('/mahasiswa/bayar/{id}', [SirkulasiController::class, 'halamanBayar'])->name('bayar');
 
+    // halaman denda
     Route::get('/mahasiswa/denda', [SirkulasiController::class, 'halamanDenda']);
 
+    // aktivasi denda
     Route::post('/mahasiswa/aktivasi-denda/{id}', [SirkulasiController::class, 'aktivasiDenda']);
 
+    // sejarah peminjaman
     Route::get('/mahasiswa/sejarah', [SirkulasiController::class, 'sejarah']);
 });
 
@@ -106,23 +129,23 @@ Route::middleware(['auth', 'role:dosen'])->group(function () {
     Route::get('/dosen/dashboard', [DosenDashboardController::class, 'index']);
 });
 
-Route::middleware(['auth', 'role:staff'])->group(function () {
 
-    Route::get('/anggota', [MemberController::class, 'index']);
-    Route::get('/anggota/{id}', [MemberController::class, 'show']);
-
-});
+// =======================
+// CALLBACK MIDTRANS
+// =======================
 
 Route::post('/payment/callback', [SirkulasiController::class, 'callback']);
-Route::post('/anggota/{id}/profile', [MemberController::class, 'saveProfile']);
-// daftar eksemplar
-Route::get('/eksemplar', [BookController::class, 'daftarEksemplar']);
-// daftar eksemplar keluar
-Route::get('/eksemplar-keluar', [BookController::class, 'eksemplarKeluar']);
+
+
 // =======================
-// DAFTAR BUKU SISWA
+// PROFILE ANGGOTA
+// =======================
+
+Route::post('/anggota/{id}/profile', [MemberController::class, 'saveProfile']);
+
+
+// =======================
+// DAFTAR BUKU SISWA / UMUM
 // =======================
 
 Route::get('/daftar-buku', [BookController::class, 'daftarBuku']);
-Route::get('/eksemplar-denda', [BookController::class, 'eksemplarDenda']);
-Route::get('/staff/laporan-keuangan', [SirkulasiController::class, 'laporanKeuangan']);

@@ -13,7 +13,21 @@
     <table style="margin-bottom:20px">
 
         <tr>
-            <td width="150"><b>Pengarang</b></td>
+            <td width="150"><b>Kategori</b></td>
+            <td>
+                {{ $book->kategori ? ucwords($book->kategori) : '-' }}
+            </td>
+        </tr>
+
+        <tr>
+            <td><b>Sinopsis</b></td>
+            <td>
+                {{ $book->sinopsis ?: '-' }}
+            </td>
+        </tr>
+
+        <tr>
+            <td><b>Pengarang</b></td>
             <td>{{ $book->pengarang }}</td>
         </tr>
 
@@ -57,16 +71,16 @@
 
         @if($book->eksemplar)
 
-        <tr>
-            <td>1</td>
-            <td>{{ $book->eksemplar }}</td>
-        </tr>
+            <tr>
+                <td>1</td>
+                <td>{{ $book->eksemplar }}</td>
+            </tr>
 
         @else
 
-        <tr>
-            <td colspan="2">Belum ada eksemplar</td>
-        </tr>
+            <tr>
+                <td colspan="2">Belum ada eksemplar</td>
+            </tr>
 
         @endif
 
