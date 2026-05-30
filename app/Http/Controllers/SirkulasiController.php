@@ -2,12 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Book;
 use App\Models\Loan;
+
+use Barryvdh\DomPDF\Facade\Pdf;
+
 use Carbon\Carbon;
-use Midtrans\Snap;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+
 use Midtrans\Config;
+use Midtrans\Snap;
+
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\LaporanKeuanganExport;
 
 class SirkulasiController extends Controller
 {
@@ -20,54 +29,186 @@ class SirkulasiController extends Controller
             'kode' => 'required'
         ]);
 
+        // =====================================
+        // CEK APAKAH MASIH ADA DENDA AKTIF
+        // =====================================
+
+        $punyaDenda = Loan::where('user_id', auth()->id())
+            ->where(function ($query) {
+
+                $query->where('status', 'denda')
+
+                    ->orWhere(function ($q) {
+
+                        $q->where('status', 'dipinjam')
+                            ->whereDate(
+                                'tanggal_kembali',
+                                '<',
+                                now()->toDateString()
+                            );
+                    });
+            })
+            ->exists();
+
+        if ($punyaDenda) {
+
+            return back()->with(
+                'error',
+                'Anda masih memiliki denda yang belum dilunasi. Silakan lunasi denda terlebih dahulu.'
+            );
+        }
+
+        // =====================================
+        // PROSES PINJAM
+        // =====================================
+
         $kode = $request->kode;
 
         $book = Book::where('eksemplar', $kode)->first();
 
         if (!$book) {
-            return back()->with('error', 'Kode eksemplar tidak ditemukan');
+
+            return back()->with(
+                'error',
+                'Kode eksemplar tidak ditemukan'
+            );
         }
 
-        // CEK apakah buku sedang dipinjam orang lain
-        $sedangDipinjam = Loan::where('kode_eksemplar', $kode)
+        // =====================================
+        // CEK BUKU SEDANG DIPINJAM
+        // =====================================
+
+        $sedangDipinjam = Loan::where(
+            'kode_eksemplar',
+            $kode
+        )
             ->where('status', 'dipinjam')
             ->exists();
 
         if ($sedangDipinjam) {
-            return back()->with('error', 'Buku dengan kode eksemplar ini sedang dipinjam');
+
+            return back()->with(
+                'error',
+                'Buku dengan kode eksemplar ini sedang dipinjam'
+            );
         }
 
-        // CEK batas maksimal pinjam mahasiswa
-        $jumlahPinjaman = Loan::where('user_id', auth()->id())
+        // =====================================
+        // BATAS MAKSIMAL 2 BUKU
+        // =====================================
+
+        $jumlahPinjaman = Loan::where(
+            'user_id',
+            auth()->id()
+        )
             ->where('status', 'dipinjam')
             ->count();
 
         if ($jumlahPinjaman >= 2) {
-            return back()->with('error', 'Batas buku dipinjam hanya 2 buah');
+
+            return back()->with(
+                'error',
+                'Batas buku dipinjam hanya 2 buah'
+            );
         }
 
-        $tanggalPinjam = Carbon::today();
-        $tanggalKembali = Carbon::today()->addDays(2);
+        // =====================================
+        // SIMPAN PINJAMAN
+        // =====================================
 
-        Loan::create([
+        $tanggalPinjam = Carbon::today();
+
+        $tanggalKembali = Carbon::today()
+            ->addDays(2);
+
+        $loan = Loan::create([
+
             'user_id' => auth()->id(),
+
             'book_id' => $book->id,
+
             'kode_eksemplar' => $kode,
+
             'tanggal_pinjam' => $tanggalPinjam,
+
             'tanggal_kembali' => $tanggalKembali,
+
             'status' => 'dipinjam',
+
             'is_extended' => false,
-            'denda' => 0
+
+            'denda' => 0,
+
+            'wa_denda_terkirim' => false,
+
+            'wa_lunas_terkirim' => false,
+
+            'wa_reminder_terkirim' => false,
         ]);
 
+        // =====================================
+        // KIRIM WA PEMINJAMAN BERHASIL
+        // =====================================
+
+        $user = auth()->user()->load('profile');
+
+        $nomor = $user->profile->nomor_hp ?? null;
+
+        if ($nomor) {
+
+            $nomor = preg_replace('/^0/', '62', $nomor);
+
+            $nama = $user->name;
+
+            $pesan =
+                "Halo {$nama} 📚\n\n" .
+
+                "Peminjaman buku berhasil.\n\n" .
+
+                "Judul Buku : {$book->judul}\n" .
+                "Kode Buku : {$kode}\n\n" .
+
+                "Tanggal Pinjam : " .
+                $tanggalPinjam->format('d-m-Y') . "\n" .
+
+                "Tanggal Kembali : " .
+                $tanggalKembali->format('d-m-Y') . "\n\n" .
+
+                "Selamat membaca dan jangan lupa mengembalikan tepat waktu 🙏\n\n" .
+
+                "Perpustakaan Digital";
+
+            try {
+
+                Http::withHeaders([
+                    'Authorization' => config('services.fonnte.token')
+                ])->post(
+                    'https://api.fonnte.com/send',
+                    [
+                        'target' => $nomor,
+                        'message' => $pesan,
+                    ]
+                );
+            } catch (\Exception $e) {
+
+                \Log::error('WA Pinjam Gagal', [
+                    'loan_id' => $loan->id,
+                    'message' => $e->getMessage()
+                ]);
+            }
+        }
+
         return back()->with([
+
             'judul' => $book->judul,
+
             'kode' => $kode,
+
             'tanggal_pinjam' => $tanggalPinjam,
+
             'tanggal_kembali' => $tanggalKembali
         ]);
     }
-
 
     // =============================
     // PINJAMAN SAAT INI
@@ -83,13 +224,15 @@ class SirkulasiController extends Controller
         return view('mahasiswa.pinjaman', compact('loans'));
     }
 
-
     // =============================
     // PERPANJANG
     // =============================
     public function perpanjang($id)
     {
-        $loan = Loan::findOrFail($id);
+        $loan = Loan::with([
+            'user.profile',
+            'book'
+        ])->findOrFail($id);
 
         // hanya boleh milik sendiri
         if ($loan->user_id != auth()->id()) {
@@ -102,16 +245,76 @@ class SirkulasiController extends Controller
 
         // hanya bisa sebelum jatuh tempo
         if (Carbon::now() > $loan->tanggal_kembali) {
-            return back()->with('error', 'Tidak bisa diperpanjang karena sudah lewat jatuh tempo');
+            return back()->with(
+                'error',
+                'Tidak bisa diperpanjang karena sudah lewat jatuh tempo'
+            );
         }
 
-        $loan->tanggal_kembali = Carbon::parse($loan->tanggal_kembali)->addDays(2);
+        $loan->tanggal_kembali = Carbon::parse(
+            $loan->tanggal_kembali
+        )->addDays(2);
+
         $loan->is_extended = true;
+
         $loan->save();
 
-        return back()->with('success', 'Berhasil diperpanjang 2 hari');
-    }
+        // =====================================
+        // KIRIM WA PERPANJANGAN BERHASIL
+        // =====================================
 
+        $nomor = $loan->user->profile->nomor_hp ?? null;
+
+        if ($nomor) {
+
+            $nomor = preg_replace('/^0/', '62', $nomor);
+
+            $nama = $loan->user->name;
+
+            $tanggalKembaliBaru = Carbon::parse(
+                $loan->tanggal_kembali
+            )->format('d-m-Y');
+
+            $pesan =
+                "Halo {$nama} 📚\n\n" .
+
+                "Perpanjangan masa peminjaman buku berhasil.\n\n" .
+
+                "Judul Buku : {$loan->book->judul}\n" .
+                "Kode Buku : {$loan->kode_eksemplar}\n\n" .
+
+                "Tanggal Kembali Baru : {$tanggalKembaliBaru}\n\n" .
+
+                "Silakan kembalikan buku sebelum tanggal tersebut untuk menghindari denda keterlambatan.\n\n" .
+
+                "Terima kasih 🙏\n" .
+                "Perpustakaan Digital";
+
+            try {
+
+                Http::withHeaders([
+                    'Authorization' => config('services.fonnte.token')
+                ])->post(
+                    'https://api.fonnte.com/send',
+                    [
+                        'target' => $nomor,
+                        'message' => $pesan,
+                    ]
+                );
+            } catch (\Exception $e) {
+
+                \Log::error('WA Perpanjang Gagal', [
+                    'loan_id' => $loan->id,
+                    'message' => $e->getMessage()
+                ]);
+            }
+        }
+
+        return back()->with(
+            'success',
+            'Berhasil diperpanjang 2 hari'
+        );
+    }
 
     // =============================
     // DENDA
@@ -219,28 +422,42 @@ class SirkulasiController extends Controller
         $grossAmount = $request->gross_amount;
         $signatureKey = $request->signature_key;
 
-        $hashed = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+        $hashed = hash(
+            'sha512',
+            $orderId . $statusCode . $grossAmount . $serverKey
+        );
 
         if ($hashed !== $signatureKey) {
+
             \Log::error('Invalid signature dari Midtrans', [
                 'order_id' => $orderId,
                 'gross_amount' => $grossAmount,
             ]);
 
-            return response()->json(['error' => 'Invalid signature'], 403);
+            return response()->json([
+                'error' => 'Invalid signature'
+            ], 403);
         }
 
         preg_match('/LOAN-(\d+)-/', $orderId, $matches);
+
         $loanId = $matches[1] ?? null;
 
         if (!$loanId) {
-            return response()->json(['error' => 'Loan ID tidak valid'], 400);
+            return response()->json([
+                'error' => 'Loan ID tidak valid'
+            ], 400);
         }
 
-        $loan = Loan::find($loanId);
+        $loan = Loan::with([
+            'user.profile',
+            'book'
+        ])->find($loanId);
 
         if (!$loan) {
-            return response()->json(['error' => 'Loan not found'], 404);
+            return response()->json([
+                'error' => 'Loan not found'
+            ], 404);
         }
 
         $transaction = $request->transaction_status;
@@ -253,7 +470,16 @@ class SirkulasiController extends Controller
             'fraud' => $fraud,
         ]);
 
-        if ($transaction === 'settlement') {
+        // ===================================================
+        // PEMBAYARAN BERHASIL
+        // ===================================================
+        if (
+            $transaction === 'settlement' ||
+            (
+                $transaction === 'capture' &&
+                ($fraud === 'accept' || $fraud === null)
+            )
+        ) {
 
             $jumlahDenda = $loan->denda > 0
                 ? $loan->denda
@@ -263,36 +489,99 @@ class SirkulasiController extends Controller
             $loan->tanggal_bayar = now('Asia/Jakarta');
             $loan->status = 'lunas';
             $loan->denda = 0;
+
             $loan->save();
-        }
 
-        if ($transaction === 'capture') {
+            // ==================================
+            // WA LUNAS HANYA 1 KALI
+            // ==================================
+            if (!$loan->wa_lunas_terkirim) {
 
-            if ($fraud === 'accept' || $fraud === null) {
+                $nomor = $loan->user->profile->nomor_hp ?? null;
 
-                $jumlahDenda = $loan->denda > 0
-                    ? $loan->denda
-                    : $loan->denda_dibayar;
+                if ($nomor) {
 
-                $loan->denda_dibayar = $jumlahDenda;
-                $loan->tanggal_bayar = now('Asia/Jakarta');
-                $loan->status = 'lunas';
-                $loan->denda = 0;
-                $loan->save();
+                    $nomor = preg_replace('/^0/', '62', $nomor);
+
+                    $nama = $loan->user->name;
+
+                    $nominalBayar = number_format(
+                        $loan->denda_dibayar,
+                        0,
+                        ',',
+                        '.'
+                    );
+
+                    $pesan =
+                        "Halo {$nama} 📚\n\n" .
+
+                        "Pembayaran denda Anda berhasil.\n\n" .
+
+                        "Judul Buku : {$loan->book->judul}\n" .
+                        "Kode Buku : {$loan->kode_eksemplar}\n" .
+                        "Nominal Dibayar : Rp {$nominalBayar}\n\n" .
+
+                        "Status Denda : LUNAS ✅\n\n" .
+
+                        "Sekarang Anda sudah dapat melakukan peminjaman buku kembali.\n\n" .
+
+                        "Tanggal Bayar : " .
+                        $loan->tanggal_bayar->format('d-m-Y H:i:s') .
+                        "\n\n" .
+
+                        "Terima kasih telah menggunakan Sistem Perpustakaan 🙏";
+
+                    try {
+
+                        Http::withHeaders([
+                            'Authorization' => config('services.fonnte.token')
+                        ])->post(
+                            'https://api.fonnte.com/send',
+                            [
+                                'target' => $nomor,
+                                'message' => $pesan,
+                            ]
+                        );
+
+                        $loan->wa_lunas_terkirim = true;
+                        $loan->save();
+                    } catch (\Exception $e) {
+
+                        \Log::error('Fonnte Error Pembayaran', [
+                            'loan_id' => $loan->id,
+                            'message' => $e->getMessage()
+                        ]);
+                    }
+                }
             }
         }
 
+        // ===================================================
+        // PENDING
+        // ===================================================
         if ($transaction === 'pending') {
+
             $loan->status = 'denda';
             $loan->save();
         }
 
-        if (in_array($transaction, ['deny', 'expire', 'cancel'])) {
+        // ===================================================
+        // GAGAL
+        // ===================================================
+        if (
+            in_array(
+                $transaction,
+                ['deny', 'expire', 'cancel']
+            )
+        ) {
+
             $loan->status = 'denda';
             $loan->save();
         }
 
-        return response()->json(['success' => true]);
+        return response()->json([
+            'success' => true
+        ]);
     }
 
     public function halamanDenda()
@@ -308,7 +597,8 @@ class SirkulasiController extends Controller
 
     public function aktivasiDenda($id)
     {
-        $loan = Loan::findOrFail($id);
+        $loan = Loan::with(['user.profile', 'book'])
+            ->findOrFail($id);
 
         if ($loan->user_id != auth()->id()) {
             return back()->with('error', 'Akses ditolak');
@@ -323,7 +613,67 @@ class SirkulasiController extends Controller
         $loan->status = 'denda';
         $loan->save();
 
-        return redirect('/mahasiswa/denda')->with('success', 'Denda diaktifkan');
+        // ==========================
+        // KIRIM WA HANYA 1 KALI
+        // ==========================
+        if (!$loan->wa_denda_terkirim) {
+
+            $nomor = $loan->user->profile->nomor_hp ?? null;
+
+            if ($nomor) {
+
+                // ubah 08xxxx menjadi 628xxxx
+                $nomor = preg_replace('/^0/', '62', $nomor);
+
+                $nama = $loan->user->name;
+
+                $nominalDenda = number_format(
+                    $loan->denda,
+                    0,
+                    ',',
+                    '.'
+                );
+
+                $pesan =
+                    "Halo {$nama} 📚\n\n" .
+
+                    "Anda telah terkena denda keterlambatan pengembalian buku.\n\n" .
+
+                    "Judul Buku : {$loan->book->judul}\n" .
+                    "Kode Buku : {$loan->kode_eksemplar}\n" .
+                    "Total Denda Saat Ini : Rp {$nominalDenda}\n\n" .
+
+                    "Denda akan terus bertambah Rp 1.000 per hari apabila belum dilunasi.\n\n" .
+
+                    "Konsekuensinya Anda tidak dapat melakukan peminjaman buku baru sampai denda dilunasi.\n\n" .
+
+                    "Silakan login ke Sistem Perpustakaan untuk melihat rincian denda Anda.\n\n" .
+
+                    "Terima kasih 🙏";
+
+                try {
+
+                    Http::withHeaders([
+                        'Authorization' => config('services.fonnte.token')
+                    ])->post('https://api.fonnte.com/send', [
+                        'target' => $nomor,
+                        'message' => $pesan,
+                    ]);
+
+                    $loan->wa_denda_terkirim = true;
+                    $loan->save();
+                } catch (\Exception $e) {
+
+                    \Log::error('Fonnte Error', [
+                        'loan_id' => $loan->id,
+                        'message' => $e->getMessage()
+                    ]);
+                }
+            }
+        }
+
+        return redirect('/mahasiswa/denda')
+            ->with('success', 'Denda diaktifkan dan notifikasi WA berhasil dikirim');
     }
 
     public function sejarah()
@@ -347,5 +697,67 @@ class SirkulasiController extends Controller
         $totalDendaLunas = $loans->sum('denda_dibayar');
 
         return view('staff.laporan-keuangan', compact('loans', 'totalDendaLunas'));
+    }
+
+    public function cetakPdf()
+    {
+        $loans = Loan::where('status', 'lunas')
+            ->with(['book', 'user'])
+            ->latest()
+            ->get();
+
+        $totalDendaLunas = $loans->sum('denda_dibayar');
+
+        $pdf = Pdf::loadView(
+            'staff.laporan-keuangan-pdf',
+            compact(
+                'loans',
+                'totalDendaLunas'
+            )
+        );
+
+        return $pdf->download(
+            'laporan-keuangan.pdf'
+        );
+    }
+
+    public function exportExcel()
+    {
+        return Excel::download(
+            new LaporanKeuanganExport,
+            'laporan-keuangan.xlsx'
+        );
+    }
+
+    public function kembalikan($id)
+    {
+        $loan = Loan::findOrFail($id);
+
+        // hanya boleh milik sendiri
+        if ($loan->user_id != auth()->id()) {
+
+            return back()->with(
+                'error',
+                'Akses ditolak'
+            );
+        }
+
+        // hanya yang masih dipinjam
+        if ($loan->status !== 'dipinjam') {
+
+            return back()->with(
+                'error',
+                'Buku tidak dapat dikembalikan'
+            );
+        }
+
+        $loan->status = 'kembali';
+
+        $loan->save();
+
+        return back()->with(
+            'success',
+            'Buku berhasil dikembalikan'
+        );
     }
 }

@@ -57,6 +57,42 @@
         color: #777;
         padding: 25px;
     }
+
+    .toolbar {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-pdf {
+        display: inline-block;
+        background: #dc2626;
+        color: white;
+        text-decoration: none;
+        padding: 10px 18px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: .2s;
+    }
+
+    .btn-pdf:hover {
+        background: #b91c1c;
+    }
+
+    .btn-excel {
+        display: inline-block;
+        background: #16a34a;
+        color: white;
+        text-decoration: none;
+        padding: 10px 18px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: .2s;
+    }
+
+    .btn-excel:hover {
+        background: #15803d;
+    }
 </style>
 
 <div class="page-title">
@@ -67,13 +103,29 @@
     $total = $loans->sum('denda_dibayar');
 @endphp
 
+<div class="toolbar">
+
+    <a href="/staff/laporan-keuangan/pdf"
+       class="btn-pdf">
+        📄 Cetak PDF
+    </a>
+
+    <a href="/staff/laporan-keuangan/excel"
+       class="btn-excel">
+        📊 Export Excel
+    </a>
+
+</div>
+
 <div class="total-box">
-    Total Denda Lunas: Rp {{ number_format($total, 0, ',', '.') }}
+    Total Denda Lunas:
+    Rp {{ number_format($total, 0, ',', '.') }}
 </div>
 
 <div class="card">
 
     <table>
+
         <tr>
             <th>Nama Peminjam</th>
             <th>Nama Buku</th>
@@ -87,30 +139,54 @@
         @forelse($loans as $loan)
 
             <tr>
+
                 <td>{{ $loan->user->name }}</td>
+
                 <td>{{ $loan->book->judul }}</td>
-                <td>{{ $loan->tanggal_pinjam->format('d M Y') }}</td>
-                <td>{{ $loan->tanggal_kembali->format('d M Y') }}</td>
+
                 <td>
-                    {{ $loan->tanggal_bayar ? $loan->tanggal_bayar->format('d M Y H:i') : '-' }}
+                    {{ $loan->tanggal_pinjam->format('d M Y') }}
                 </td>
+
+                <td>
+                    {{ $loan->tanggal_kembali->format('d M Y') }}
+                </td>
+
+                <td>
+                    {{ $loan->tanggal_bayar
+                        ? $loan->tanggal_bayar->format('d M Y H:i')
+                        : '-' }}
+                </td>
+
                 <td style="color:#16a34a;font-weight:600;">
-                    Rp {{ number_format($loan->denda_dibayar, 0, ',', '.') }}
+                    Rp {{ number_format(
+                        $loan->denda_dibayar,
+                        0,
+                        ',',
+                        '.'
+                    ) }}
                 </td>
+
                 <td>
-                    <span class="status-lunas">Lunas</span>
+                    <span class="status-lunas">
+                        Lunas
+                    </span>
                 </td>
+
             </tr>
 
         @empty
 
             <tr>
+
                 <td colspan="7" class="empty">
                     Belum ada pembayaran denda yang lunas
                 </td>
+
             </tr>
 
         @endforelse
+
     </table>
 
 </div>

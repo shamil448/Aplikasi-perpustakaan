@@ -14,16 +14,27 @@ class Loan extends Model
         'tanggal_kembali',
         'status',
         'is_extended',
+
         'denda',
         'denda_dibayar',
         'tanggal_bayar',
+
+        'wa_denda_terkirim',
+        'wa_lunas_terkirim',
+        'wa_reminder_terkirim',
     ];
 
     protected $casts = [
         'tanggal_pinjam' => 'date',
         'tanggal_kembali' => 'date',
         'tanggal_bayar' => 'datetime',
+
         'is_extended' => 'boolean',
+
+        'wa_denda_terkirim' => 'boolean',
+        'wa_lunas_terkirim' => 'boolean',
+        'wa_reminder_terkirim' => 'boolean',
+
         'denda' => 'integer',
         'denda_dibayar' => 'integer',
     ];

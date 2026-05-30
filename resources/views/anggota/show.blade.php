@@ -33,10 +33,46 @@
         border: 1px solid #ccc;
         border-radius: 8px;
         font-size: 14px;
+        box-sizing: border-box;
     }
 
     .readonly {
         background: #f3f4f6;
+        color: #555;
+        cursor: not-allowed;
+    }
+
+    .btn {
+        padding: 10px 18px;
+        border-radius: 8px;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .btn-primary {
+        background: #2563eb;
+        color: white;
+    }
+
+    .btn-secondary {
+        background: #e5e7eb;
+        color: black;
+    }
+
+    .btn-warning {
+        background: #f59e0b;
+        color: white;
+    }
+
+    .alert-success {
+        background: #dcfce7;
+        color: #166534;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-weight: 600;
     }
 </style>
 
@@ -46,89 +82,88 @@
         Biodata Anggota
     </div>
 
+    @if(session('success'))
+
+        <div class="alert-success">
+            {{ session('success') }}
+        </div>
+
+    @endif
+
     <form method="POST" action="/anggota/{{ $member->id }}/profile">
 
         @csrf
 
         {{-- NAMA --}}
         <div class="form-group">
-
-            <label class="form-label">
-                Nama
-            </label>
+            <label class="form-label">Nama</label>
 
             <input
                 type="text"
                 class="form-input readonly"
                 value="{{ $member->name }}"
                 readonly>
-
         </div>
 
         {{-- EMAIL --}}
         <div class="form-group">
-
-            <label class="form-label">
-                Email
-            </label>
+            <label class="form-label">Email</label>
 
             <input
                 type="email"
                 class="form-input readonly"
                 value="{{ $member->email }}"
                 readonly>
-
         </div>
 
         {{-- PASSWORD --}}
         <div class="form-group">
-
-            <label class="form-label">
-                Password
-            </label>
+            <label class="form-label">Password</label>
 
             <input
                 type="password"
                 class="form-input readonly"
                 value="password"
                 readonly>
-
         </div>
 
         {{-- ROLE --}}
         <div class="form-group">
-
-            <label class="form-label">
-                Role
-            </label>
+            <label class="form-label">Role</label>
 
             <input
                 type="text"
                 class="form-input readonly"
                 value="{{ ucfirst($member->role) }}"
                 readonly>
-
         </div>
 
         <hr style="margin:30px 0;">
 
-        {{-- INPUT MANUAL --}}
-
+        {{-- NIM / NIP / NIDN --}}
         <div class="form-group">
 
             <label class="form-label">
-                NIM / NIDN
+
+                @if($member->role == 'mahasiswa')
+                    NIM
+                @elseif($member->role == 'staff')
+                    NIP
+                @else
+                    NIDN
+                @endif
+
             </label>
 
             <input
                 type="text"
-                name="nim_nidn"
-                class="form-input"
+                class="form-input readonly"
                 value="{{ $member->profile->nim_nidn ?? '' }}"
-                placeholder="Masukkan NIM atau NIDN">
+                readonly>
 
         </div>
 
+        {{-- FAKULTAS --}}
         <div class="form-group">
 
             <label class="form-label">
@@ -143,6 +178,7 @@
 
         </div>
 
+        {{-- JURUSAN --}}
         <div class="form-group">
 
             <label class="form-label">
@@ -157,6 +193,7 @@
 
         </div>
 
+        {{-- NOMOR HP --}}
         <div class="form-group">
 
             <label class="form-label">
@@ -165,12 +202,13 @@
 
             <input
                 type="text"
-                name="nomor_hp"
-                class="form-input"
-                value="{{ $member->profile->nomor_hp ?? '' }}">
+                class="form-input readonly"
+                value="{{ $member->profile->nomor_hp ?? '' }}"
+                readonly>
 
         </div>
 
+        {{-- ALAMAT --}}
         <div class="form-group">
 
             <label class="form-label">
@@ -184,21 +222,46 @@
 
         </div>
 
-        <div style="display:flex; gap:10px; margin-top:25px;">
+        <div
+            style="
+                display:flex;
+                gap:10px;
+                margin-top:25px;
+                flex-wrap:wrap;
+            ">
 
-            {{-- tombol kembali --}}
             <a href="/anggota" class="btn btn-secondary">
                 ← Kembali
             </a>
 
-            {{-- tombol update --}}
-            <button type="submit" class="btn btn-primary">
+            <button
+                type="submit"
+                class="btn btn-primary">
+
                 💾 Update Biodata
+
             </button>
 
-        </div>
-
     </form>
+
+            <form
+                method="POST"
+                action="/anggota/{{ $member->id }}/reset-password"
+                onsubmit="return confirm('Yakin reset password anggota ini?')">
+
+                @csrf
+
+                <button
+                    type="submit"
+                    class="btn btn-warning">
+
+                    🔑 Reset Password
+
+                </button>
+
+            </form>
+
+        </div>
 
 </div>
 

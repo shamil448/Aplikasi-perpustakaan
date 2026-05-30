@@ -1,6 +1,3 @@
-Siap bro, ini **`resources/views/books/edit.blade.php` versi baru lengkap**. Sudah gua tambahin **Kategori Buku** dan **Sinopsis Buku**.
-
-```blade
 @extends('layouts.staff')
 
 @section('content')
