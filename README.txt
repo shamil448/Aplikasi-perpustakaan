@@ -152,6 +152,152 @@ Scheduler dijalankan menggunakan:
 php artisan schedule:work
 
 =========================================
+PERINTAH ARTISAN YANG DIGUNAKAN
+
+1. Menjalankan Server Laravel
+
+php artisan serve
+
+Fungsi:
+Menjalankan aplikasi Laravel pada localhost.
+
+Akses:
+http://127.0.0.1:8000
+
+=========================================
+
+2. Migrasi Database
+
+php artisan migrate
+
+Fungsi:
+Membuat seluruh tabel database sesuai migration.
+
+=========================================
+
+3. Membuat Storage Link
+
+php artisan storage:link
+
+Fungsi:
+Menghubungkan folder storage dengan folder public agar gambar buku dapat ditampilkan.
+
+=========================================
+
+4. Membersihkan Cache Konfigurasi
+
+php artisan config:clear
+
+Fungsi:
+Menghapus cache konfigurasi Laravel.
+
+=========================================
+
+5. Membersihkan Cache Aplikasi
+
+php artisan cache:clear
+
+Fungsi:
+Menghapus cache aplikasi Laravel.
+
+=========================================
+
+6. Membersihkan Route Cache
+
+php artisan route:clear
+
+Fungsi:
+Menghapus cache routing Laravel.
+
+=========================================
+
+7. Generate Application Key
+
+php artisan key:generate
+
+Fungsi:
+Membuat APP_KEY baru pada file .env.
+
+=========================================
+
+8. Menjalankan Scheduler
+
+php artisan schedule:work
+
+Fungsi:
+Menjalankan task otomatis Laravel secara terus-menerus.
+
+Digunakan untuk:
+
+- Reminder WhatsApp jatuh tempo buku.
+
+=========================================
+
+9. Menjalankan Scheduler Sekali
+
+php artisan schedule:run
+
+Fungsi:
+Menjalankan semua jadwal yang tersedia satu kali.
+
+Biasanya digunakan untuk pengujian.
+
+=========================================
+
+10. Mengirim Reminder WhatsApp Secara Manual
+
+php artisan app:kirim-reminder-jatuh-tempo
+
+Fungsi:
+Mengirim pesan WhatsApp kepada anggota yang memiliki buku dengan tanggal pengembalian H-1 sebelum jatuh tempo.
+
+Digunakan untuk:
+
+- Pengujian fitur reminder.
+- Pengiriman manual oleh administrator.
+
+=========================================
+
+11. Melihat Daftar Route
+
+php artisan route:list
+
+Fungsi:
+Menampilkan seluruh route yang tersedia dalam aplikasi.
+
+=========================================
+
+12. Optimasi Laravel
+
+php artisan optimize
+
+Fungsi:
+Mengoptimalkan performa aplikasi Laravel.
+
+=========================================
+
+13. Menghapus Seluruh Cache
+
+php artisan optimize:clear
+
+Fungsi:
+Menghapus seluruh cache aplikasi Laravel.
+
+Digunakan saat terjadi perubahan konfigurasi atau debugging.
+
+=========================================
+
+CATATAN
+
+Untuk penggunaan normal aplikasi, perintah yang wajib dijalankan adalah:
+
+php artisan serve
+
+Apabila fitur reminder WhatsApp ingin digunakan secara otomatis, jalankan juga:
+
+php artisan schedule:work
+
+=========================================
 PENGEMBANG
 
 Nama:
