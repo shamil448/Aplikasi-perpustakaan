@@ -259,7 +259,6 @@
 
         <a href="#">Beranda</a>
         <a class="active">Bibliografi</a>
-        <a href="#">Sirkulasi</a>
         <a href="/anggota">Keanggotaan</a>
 
         <form method="POST" action="/logout" style="margin-left:auto;">

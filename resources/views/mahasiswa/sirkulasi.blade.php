@@ -148,12 +148,7 @@ $q->where('status', 'dipinjam')
             <div class="menu">
 
                 <a class="active">Mulai Transaksi</a>
-                <a>Pengembalian Kilat</a>
-                <a>Aturan Peminjaman</a>
-                <a>Sejarah Peminjaman</a>
-                <a>Peringatan Jatuh Tempo</a>
-                <a>Daftar Keterlambatan</a>
-                <a>Reservasi</a>
+                <a class="active">Sejarah Peminjaman</a>
 
             </div>
 
@@ -165,7 +160,6 @@ $q->where('status', 'dipinjam')
 
                 <a class="active">Peminjaman (F2)</a>
                 <a href="/mahasiswa/pinjaman">Pinjaman Saat Ini (F3)</a>
-                <a>Reservasi (F4)</a>
                 <a href="/mahasiswa/denda">Denda (F9)</a>
                 <a href="/mahasiswa/sejarah">Sejarah Peminjaman (F10)</a>
 

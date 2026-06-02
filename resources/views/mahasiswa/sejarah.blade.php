@@ -129,12 +129,7 @@
         <h3>SIRKULASI</h3>
         <div class="menu">
             <a href="/mahasiswa/sirkulasi">Mulai Transaksi</a>
-            <a>Pengembalian Kilat</a>
-            <a>Aturan Peminjaman</a>
             <a class="active">Sejarah Peminjaman</a>
-            <a>Peringatan Jatuh Tempo</a>
-            <a>Daftar Keterlambatan</a>
-            <a>Reservasi</a>
         </div>
     </div>
 
@@ -143,7 +138,6 @@
         <div class="tabs">
             <a href="/mahasiswa/sirkulasi">Peminjaman (F2)</a>
             <a href="/mahasiswa/pinjaman">Pinjaman Saat Ini (F3)</a>
-            <a>Reservasi (F4)</a>
             <a href="/mahasiswa/denda">Denda (F9)</a>
             <a class="active">Sejarah Peminjaman (F10)</a>
         </div>

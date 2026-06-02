@@ -194,28 +194,8 @@
                 Mulai Transaksi
             </a>
 
-            <a>
-                Pengembalian Kilat
-            </a>
-
-            <a>
-                Aturan Peminjaman
-            </a>
-
             <a href="/mahasiswa/sejarah">
                 Sejarah Peminjaman
-            </a>
-
-            <a>
-                Peringatan Jatuh Tempo
-            </a>
-
-            <a>
-                Daftar Keterlambatan
-            </a>
-
-            <a>
-                Reservasi
             </a>
 
         </div>
@@ -236,10 +216,6 @@
 
                 Pinjaman Saat Ini (F3)
 
-            </a>
-
-            <a>
-                Reservasi (F4)
             </a>
 
             <a href="/mahasiswa/denda">
