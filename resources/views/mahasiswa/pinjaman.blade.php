@@ -167,19 +167,14 @@
 </style>
 
 @php
-    $todayGlobal = now()->startOfDay();
-    $dendaCount = 0;
 
-    foreach ($loans as $item) {
+$dendaCount = \App\Models\Loan::where(
+'user_id',
+auth()->id()
+)
+->where('status', 'denda')
+->count();
 
-        $jatuhTempoItem = \Carbon\Carbon::parse(
-            $item->tanggal_kembali
-        )->startOfDay();
-
-        if ($todayGlobal->gt($jatuhTempoItem)) {
-            $dendaCount++;
-        }
-    }
 @endphp
 
 <div class="wrapper">
@@ -218,14 +213,18 @@
 
             </a>
 
+            <a href="/mahasiswa/pengembalian">
+                Pengembalian (F4)
+            </a>
+
             <a href="/mahasiswa/denda">
 
                 Denda (F9)
 
                 @if($dendaCount > 0)
-                    <span class="badge">
-                        {{ $dendaCount }}
-                    </span>
+                <span class="badge">
+                    {{ $dendaCount }}
+                </span>
                 @endif
 
             </a>
@@ -238,17 +237,17 @@
 
         @if(session('success'))
 
-            <div class="alert-success">
-                {{ session('success') }}
-            </div>
+        <div class="alert-success">
+            {{ session('success') }}
+        </div>
 
         @endif
 
         @if(session('error'))
 
-            <div class="alert-error">
-                {{ session('error') }}
-            </div>
+        <div class="alert-error">
+            {{ session('error') }}
+        </div>
 
         @endif
 
@@ -269,156 +268,139 @@
 
             @forelse($loans as $loan)
 
-                @php
+            @php
 
-                    $today = now()->startOfDay();
+            $today = now()->startOfDay();
 
-                    $jatuhTempo =
-                        \Carbon\Carbon::parse(
-                            $loan->tanggal_kembali
-                        )->startOfDay();
+            $jatuhTempo =
+            \Carbon\Carbon::parse(
+            $loan->tanggal_kembali
+            )->startOfDay();
 
-                    $telatHari = 0;
-                    $denda = 0;
+            $telatHari = 0;
+            $denda = 0;
 
-                    if ($today->gt($jatuhTempo)) {
+            if ($today->gt($jatuhTempo)) {
 
-                        $telatHari =
-                            $jatuhTempo->diffInDays($today);
+            $telatHari =
+            $jatuhTempo->diffInDays($today);
 
-                        $denda =
-                            $telatHari * 1000;
+            $denda =
+            $telatHari * 1000;
 
-                        if ($loan->denda != $denda) {
+            if ($loan->denda != $denda) {
 
-                            $loan->denda = $denda;
+            $loan->denda = $denda;
 
-                            $loan->save();
-                        }
-                    }
+            $loan->save();
+            }
+            }
 
-                    $besokJatuhTempo =
-                        $today->copy()
-                            ->addDay()
-                            ->isSameDay($jatuhTempo);
+            $besokJatuhTempo =
+            $today->copy()
+            ->addDay()
+            ->isSameDay($jatuhTempo);
 
-                @endphp
+            @endphp
 
-                <tr>
+            <tr>
 
-                    <td>
-                        {{ $loan->kode_eksemplar }}
-                    </td>
+                <td>
+                    {{ $loan->kode_eksemplar }}
+                </td>
 
-                    <td>
-                        {{ $loan->book->judul }}
-                    </td>
+                <td>
+                    {{ $loan->book->judul }}
+                </td>
 
-                    <td>
-                        {{ $loan->tanggal_pinjam->format('d M Y') }}
-                    </td>
+                <td>
+                    {{ $loan->tanggal_pinjam->format('d M Y') }}
+                </td>
 
-                    <td>
-                        {{ $loan->tanggal_kembali->format('d M Y') }}
-                    </td>
+                <td>
+                    {{ $loan->tanggal_kembali->format('d M Y') }}
+                </td>
 
-                    <td>
+                <td>
 
-                        @if($denda > 0)
+                    @if($denda > 0)
 
-                            <span style="color:#dc2626;font-weight:600;">
+                    <span style="color:#dc2626;font-weight:600;">
 
-                                Rp {{ number_format(
+                        Rp {{ number_format(
                                     $denda,
                                     0,
                                     ',',
                                     '.'
                                 ) }}
 
-                            </span>
+                    </span>
 
-                        @else
+                    @else
 
-                            -
+                    -
 
-                        @endif
+                    @endif
 
-                    </td>
+                </td>
 
-                    <td>
+                <td>
 
-                        @if(!$loan->is_extended && $besokJatuhTempo)
+                    @if(!$loan->is_extended && $besokJatuhTempo)
 
-                            <form
-                                method="POST"
-                                action="/mahasiswa/perpanjang/{{ $loan->id }}">
+                    <form
+                        method="POST"
+                        action="/mahasiswa/perpanjang/{{ $loan->id }}">
 
-                                @csrf
+                        @csrf
 
-                                <button
-                                    type="submit"
-                                    class="btn btn-green">
+                        <button
+                            type="submit"
+                            class="btn btn-green">
 
-                                    Perpanjang 2 Hari
+                            Perpanjang 2 Hari
 
-                                </button>
+                        </button>
 
-                            </form>
+                    </form>
 
-                        @endif
+                    @endif
 
-                        <form
-                            method="POST"
-                            action="/mahasiswa/kembalikan/{{ $loan->id }}"
-                            onsubmit="return confirm('Yakin ingin mengembalikan buku ini?')">
+                    @if($denda > 0)
 
-                            @csrf
+                    <form
+                        method="POST"
+                        action="/mahasiswa/aktivasi-denda/{{ $loan->id }}">
 
-                            <button
-                                type="submit"
-                                class="btn btn-blue">
+                        @csrf
 
-                                Kembalikan Buku
+                        <button
+                            type="submit"
+                            class="btn btn-red">
 
-                            </button>
+                            Aktivasi Denda
 
-                        </form>
+                        </button>
 
-                        @if($denda > 0)
+                    </form>
 
-                            <form
-                                method="POST"
-                                action="/mahasiswa/aktivasi-denda/{{ $loan->id }}">
+                    @endif
 
-                                @csrf
+                </td>
 
-                                <button
-                                    type="submit"
-                                    class="btn btn-red">
-
-                                    Aktivasi Denda
-
-                                </button>
-
-                            </form>
-
-                        @endif
-
-                    </td>
-
-                </tr>
+            </tr>
 
             @empty
 
-                <tr>
+            <tr>
 
-                    <td colspan="6" class="empty">
+                <td colspan="6" class="empty">
 
-                        Tidak ada buku yang sedang dipinjam
+                    Tidak ada buku yang sedang dipinjam
 
-                    </td>
+                </td>
 
-                </tr>
+            </tr>
 
             @endforelse
 

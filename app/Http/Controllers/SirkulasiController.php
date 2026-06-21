@@ -760,4 +760,178 @@ class SirkulasiController extends Controller
             'Buku berhasil dikembalikan'
         );
     }
+
+    public function pengembalian()
+    {
+        return view('mahasiswa.pengembalian');
+    }
+
+    public function cariPengembalian(Request $request)
+    {
+        $request->validate([
+            'kode' => 'required'
+        ]);
+
+        $loan = Loan::with('book')
+            ->where('kode_eksemplar', $request->kode)
+            ->where('user_id', auth()->id())
+            ->latest()
+            ->first();
+
+        if (!$loan) {
+
+            return back()->with(
+                'error',
+                'Data pinjaman tidak ditemukan'
+            );
+        }
+
+        // =====================================
+        // CEK DENDA
+        // =====================================
+
+        if ($loan->status === 'denda') {
+
+            return back()->with(
+                'error',
+                'Anda terkena denda, silakan lunasi denda terlebih dahulu. Terima kasih.'
+            );
+        }
+
+        // =====================================
+        // HANYA BOLEH STATUS DIPINJAM
+        // =====================================
+
+        if ($loan->status === 'kembali') {
+
+            return back()->with(
+                'error',
+                'Buku ini sudah pernah dikembalikan.'
+            );
+        }
+
+        if ($loan->status === 'lunas') {
+
+            return back()->with(
+                'error',
+                'Data pinjaman ini sudah selesai.'
+            );
+        }
+
+        if ($loan->status === 'denda') {
+
+            return back()->with(
+                'error',
+                'Anda terkena denda, silakan lunasi denda terlebih dahulu agar dapat menggunakan layanan perpustakaan kembali.'
+            );
+        }
+
+        // =====================================
+        // CEK SUDAH LEWAT JATUH TEMPO
+        // =====================================
+
+        $today = now()->startOfDay();
+
+        $jatuhTempo = \Carbon\Carbon::parse(
+            $loan->tanggal_kembali
+        )->startOfDay();
+
+        if ($today->gt($jatuhTempo)) {
+
+            return back()->with(
+                'error',
+                'Buku tidak dapat dikembalikan karena Anda terkena denda. Silakan aktivasi dan lunasi denda terlebih dahulu agar dapat menggunakan layanan perpustakaan kembali.'
+            );
+        }
+
+        return view(
+            'mahasiswa.pengembalian',
+            compact('loan')
+        );
+    }
+
+    public function konfirmasiPengembalian($id)
+    {
+        $loan = Loan::with([
+            'user.profile',
+            'book'
+        ])->findOrFail($id);
+
+        if ($loan->user_id != auth()->id()) {
+
+            return back()->with(
+                'error',
+                'Akses ditolak'
+            );
+        }
+
+        if ($loan->status !== 'dipinjam') {
+
+            return back()->with(
+                'error',
+                'Buku tidak dapat dikembalikan'
+            );
+        }
+
+        $loan->status = 'kembali';
+
+        $loan->save();
+
+        // =====================================
+        // KIRIM WA PENGEMBALIAN BERHASIL
+        // =====================================
+
+        $nomor = $loan->user->profile->nomor_hp ?? null;
+
+        if ($nomor) {
+
+            $nomor = preg_replace('/^0/', '62', $nomor);
+
+            $nama = $loan->user->name;
+
+            $tanggalPengembalian =
+                now()->format('d-m-Y H:i');
+
+            $pesan =
+                "Halo {$nama} 📚\n\n" .
+
+                "Pengembalian buku berhasil.\n\n" .
+
+                "Judul Buku : {$loan->book->judul}\n" .
+                "Kode Buku : {$loan->kode_eksemplar}\n\n" .
+
+                "Tanggal Pengembalian : {$tanggalPengembalian}\n\n" .
+
+                "Status : DIKEMBALIKAN ✅\n\n" .
+
+                "Terima kasih telah menggunakan layanan perpustakaan.\n\n" .
+
+                "Perpustakaan Digital";
+
+            try {
+
+                Http::withHeaders([
+                    'Authorization' => config('services.fonnte.token')
+                ])->post(
+                    'https://api.fonnte.com/send',
+                    [
+                        'target' => $nomor,
+                        'message' => $pesan,
+                    ]
+                );
+            } catch (\Exception $e) {
+
+                \Log::error('WA Pengembalian Gagal', [
+                    'loan_id' => $loan->id,
+                    'message' => $e->getMessage()
+                ]);
+            }
+        }
+
+        return redirect('/mahasiswa/pengembalian')
+            ->with(
+                'success',
+                'Buku berhasil dikembalikan'
+            );
+    }
 }

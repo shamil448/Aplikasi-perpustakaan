@@ -102,27 +102,69 @@ Route::middleware(['auth', 'role:mahasiswa'])->group(function () {
     // pinjaman saat ini
     Route::get('/mahasiswa/pinjaman', [SirkulasiController::class, 'pinjamanSaatIni']);
 
-    // perpanjang buku
-    Route::post('/mahasiswa/perpanjang/{id}', [SirkulasiController::class, 'perpanjang']);
+    // =====================================
+    // PENGEMBALIAN BUKU (BARU)
+    // =====================================
 
-    // kembalikan buku
-    Route::post('/mahasiswa/kembalikan/{id}', [SirkulasiController::class, 'kembalikan']);
+    // halaman pengembalian
+    Route::get(
+        '/mahasiswa/pengembalian',
+        [SirkulasiController::class, 'pengembalian']
+    );
 
-    // hitung denda
-    Route::post('/mahasiswa/denda/{id}', [SirkulasiController::class, 'denda']);
+    // cari data pinjaman berdasarkan kode eksemplar
+    Route::post(
+        '/mahasiswa/pengembalian',
+        [SirkulasiController::class, 'cariPengembalian']
+    );
+
+    // konfirmasi pengembalian
+    Route::post(
+        '/mahasiswa/pengembalian/{id}',
+        [SirkulasiController::class, 'konfirmasiPengembalian']
+    );
+
+    // =====================================
+    // PERPANJANG
+    // =====================================
+
+    Route::post(
+        '/mahasiswa/perpanjang/{id}',
+        [SirkulasiController::class, 'perpanjang']
+    );
+
+    // =====================================
+    // DENDA
+    // =====================================
+
+    Route::post(
+        '/mahasiswa/denda/{id}',
+        [SirkulasiController::class, 'denda']
+    );
 
     // halaman bayar
-    Route::get('/mahasiswa/bayar/{id}', [SirkulasiController::class, 'halamanBayar'])
-        ->name('bayar');
+    Route::get(
+        '/mahasiswa/bayar/{id}',
+        [SirkulasiController::class, 'halamanBayar']
+    )->name('bayar');
 
     // halaman denda
-    Route::get('/mahasiswa/denda', [SirkulasiController::class, 'halamanDenda']);
+    Route::get(
+        '/mahasiswa/denda',
+        [SirkulasiController::class, 'halamanDenda']
+    );
 
     // aktivasi denda
-    Route::post('/mahasiswa/aktivasi-denda/{id}', [SirkulasiController::class, 'aktivasiDenda']);
+    Route::post(
+        '/mahasiswa/aktivasi-denda/{id}',
+        [SirkulasiController::class, 'aktivasiDenda']
+    );
 
     // sejarah peminjaman
-    Route::get('/mahasiswa/sejarah', [SirkulasiController::class, 'sejarah']);
+    Route::get(
+        '/mahasiswa/sejarah',
+        [SirkulasiController::class, 'sejarah']
+    );
 });
 
 // =======================

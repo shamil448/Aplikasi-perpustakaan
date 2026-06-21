@@ -222,15 +222,44 @@ class BookController extends Controller
     // =============================
     public function eksemplarKeluar(Request $request)
     {
-        $books = collect();
+        $query = Loan::with([
+            'book',
+            'user'
+        ])
+            ->whereIn('status', [
+                'dipinjam',
+                'denda'
+            ]);
 
         if ($request->search) {
-            $books = Book::where('eksemplar', 'like', '%' . $request->search . '%')
-                ->latest()
-                ->get();
+
+            $query->where(function ($q) use ($request) {
+
+                $q->where(
+                    'kode_eksemplar',
+                    'like',
+                    '%' . $request->search . '%'
+                )
+
+                    ->orWhereHas('user', function ($user) use ($request) {
+
+                        $user->where(
+                            'name',
+                            'like',
+                            '%' . $request->search . '%'
+                        );
+                    });
+            });
         }
 
-        return view('books.eksemplar-keluar', compact('books'));
+        $loans = $query
+            ->latest()
+            ->get();
+
+        return view(
+            'books.eksemplar-keluar',
+            compact('loans')
+        );
     }
 
     // =============================

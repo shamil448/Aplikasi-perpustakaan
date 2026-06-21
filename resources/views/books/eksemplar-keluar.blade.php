@@ -45,7 +45,7 @@
         background: white;
         padding: 20px;
         border-radius: 10px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     }
 
     table {
@@ -99,118 +99,86 @@
 </div>
 
 
-<form method="GET" action="/eksemplar-keluar">
-
-    <div class="search-box">
-
-        <input
-            type="text"
-            name="search"
-            placeholder="Cari kode eksemplar..."
-            value="{{ request('search') }}">
-
-        <button type="submit" class="btn btn-primary">
-            Cari
-        </button>
-
-    </div>
-
-</form>
-
-
 <div class="card">
 
-    @if(!request('search'))
+    <table>
 
-        <div class="empty-box">
-            Cari kode eksemplar terlebih dahulu
-        </div>
+        <tr>
+            <th>KODE EKSEMPLAR</th>
+            <th>JUDUL BUKU</th>
+            <th>PEMINJAM</th>
+            <th>TANGGAL PINJAM</th>
+            <th>TANGGAL KEMBALI</th>
+            <th>STATUS</th>
+        </tr>
 
-    @else
+        @forelse($loans as $loan)
 
-        <table>
+        <tr>
 
-            <tr>
-                <th width="120">SUNTING</th>
-                <th>KODE EKSEMPLAR</th>
-                <th>JUDUL BUKU</th>
-                <th width="180">ISBN / ISSN</th>
-                <th width="150">LOKASI</th>
-                <th width="140">STATUS</th>
-            </tr>
+            <td>
+                {{ $loan->kode_eksemplar }}
+            </td>
 
-            @forelse($books as $book)
+            <td>
+                {{ $loan->book->judul }}
+            </td>
+
+            <td>
+                {{ $loan->user->name }}
+            </td>
+
+            <td>
+                {{ $loan->tanggal_pinjam->format('d M Y') }}
+            </td>
+
+            <td>
+                {{ $loan->tanggal_kembali->format('d M Y') }}
+            </td>
+
+            <td>
 
                 @php
-                    $loan = \App\Models\Loan::where('kode_eksemplar', $book->eksemplar)
-                        ->whereIn('status', ['dipinjam', 'denda'])
-                        ->latest()
-                        ->first();
+                $today = now()->startOfDay();
+
+                $jatuhTempo = \Carbon\Carbon::parse(
+                $loan->tanggal_kembali
+                )->startOfDay();
+
+                $kenaDenda =
+                $loan->status == 'denda' ||
+                $today->gt($jatuhTempo);
                 @endphp
 
-                @if($loan)
+                @if($kenaDenda)
 
-                    @php
-                        $today = now()->startOfDay();
-                        $jatuhTempo = \Carbon\Carbon::parse($loan->tanggal_kembali)->startOfDay();
+                <span class="status-denda">
+                    Denda
+                </span>
 
-                        $isDenda = $loan->status == 'denda' || $today->gt($jatuhTempo);
-                    @endphp
+                @else
 
-                    <tr>
-
-                        <td>
-                            <a href="/books/{{ $book->id }}/edit"
-                               class="btn btn-secondary">
-                                ✏️ Sunting
-                            </a>
-                        </td>
-
-                        <td>
-                            {{ $book->eksemplar }}
-                        </td>
-
-                        <td>
-                            {{ $book->judul }}
-                        </td>
-
-                        <td>
-                            {{ $book->isbn_issn }}
-                        </td>
-
-                        <td>
-                            {{ $book->lokasi_rak ?: $book->lokasi }}
-                        </td>
-
-                        <td>
-                            @if($isDenda)
-                                <span class="status-denda">
-                                    Denda
-                                </span>
-                            @else
-                                <span class="status-dipinjam">
-                                    Dipinjam
-                                </span>
-                            @endif
-                        </td>
-
-                    </tr>
+                <span class="status-dipinjam">
+                    Dipinjam
+                </span>
 
                 @endif
 
-            @empty
+            </td>
 
-                <tr>
-                    <td colspan="6">
-                        Data tidak ditemukan
-                    </td>
-                </tr>
+        </tr>
 
-            @endforelse
+        @empty
 
-        </table>
+        <tr>
+            <td colspan="6">
+                Tidak ada buku yang sedang dipinjam
+            </td>
+        </tr>
 
-    @endif
+        @endforelse
+
+    </table>
 
 </div>
 
