@@ -84,12 +84,8 @@ class AuthController extends Controller
                 return redirect('/staff/dashboard');
             }
 
-            if ($user->role === 'mahasiswa') {
+            if (in_array($user->role, ['mahasiswa', 'dosen'])) {
                 return redirect('/mahasiswa/dashboard');
-            }
-
-            if ($user->role === 'dosen') {
-                return redirect('/dosen/dashboard');
             }
 
             return redirect('/login');

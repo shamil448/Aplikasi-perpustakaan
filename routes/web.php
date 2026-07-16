@@ -86,7 +86,7 @@ Route::middleware(['auth', 'role:staff'])->group(function () {
 // MAHASISWA
 // =======================
 
-Route::middleware(['auth', 'role:mahasiswa'])->group(function () {
+Route::middleware(['auth', 'role:mahasiswa,dosen'])->group(function () {
 
     // dashboard mahasiswa
     Route::get('/mahasiswa/dashboard', [MahasiswaDashboardController::class, 'index']);
