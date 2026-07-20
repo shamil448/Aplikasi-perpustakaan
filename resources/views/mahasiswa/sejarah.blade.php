@@ -2,199 +2,246 @@
 
 @section('content')
 
-<style>
-    .wrapper {
-        display: flex;
-        gap: 30px;
-    }
+    <style>
+        .wrapper {
+            display: flex;
+            gap: 30px;
+        }
 
-    .sirkulasi {
-        width: 320px;
-        background: linear-gradient(180deg, #1e40af, #2563eb);
-        padding: 30px;
-        border-radius: 15px;
-        color: white;
-    }
+        .sirkulasi {
+            width: 320px;
+            background: linear-gradient(180deg, #1e40af, #2563eb);
+            padding: 30px;
+            border-radius: 15px;
+            color: white;
+        }
 
-    .sirkulasi h3 {
-        margin-bottom: 20px;
-        font-size: 14px;
-        opacity: .8;
-    }
+        .sirkulasi h3 {
+            margin-bottom: 20px;
+            font-size: 14px;
+            opacity: .8;
+        }
 
-    .menu {
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
-    }
+        .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
 
-    .menu a {
-        text-decoration: none;
-        color: white;
-        font-size: 18px;
-        padding: 12px 18px;
-        border-radius: 30px;
-    }
+        .menu a {
+            text-decoration: none;
+            color: white;
+            font-size: 18px;
+            padding: 12px 18px;
+            border-radius: 30px;
+        }
 
-    .menu a.active {
-        background: white;
-        color: #2563eb;
-        font-weight: 600;
-    }
+        .menu a.active {
+            background: white;
+            color: #2563eb;
+            font-weight: 600;
+        }
 
-    .transaksi {
-        flex: 1;
-        background: white;
-        padding: 25px;
-        border-radius: 10px;
-        box-shadow: 0 3px 10px rgba(0, 0, 0, .08);
-    }
+        .transaksi {
+            flex: 1;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, .08);
+        }
 
-    .tabs {
-        display: flex;
-        gap: 25px;
-        padding-bottom: 10px;
-        margin-bottom: 25px;
-    }
+        .tabs {
+            display: flex;
+            gap: 25px;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+        }
 
-    .tabs a {
-        text-decoration: none;
-        color: #444;
-        font-weight: 500;
-        position: relative;
-    }
+        .tabs a {
+            text-decoration: none;
+            color: #444;
+            font-weight: 500;
+            position: relative;
+        }
 
-    .tabs a.active {
-        color: #2563eb;
-        font-weight: 600;
-    }
+        .tabs a.active {
+            color: #2563eb;
+            font-weight: 600;
+        }
 
-    .tabs a.active::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        bottom: -5px;
-        width: 100%;
-        height: 2px;
-        background: #2563eb;
-    }
+        .tabs a.active::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -5px;
+            width: 100%;
+            height: 2px;
+            background: #2563eb;
+        }
 
-    .table-modern {
-        width: 100%;
-        border-collapse: collapse;
-    }
+        .info-denda {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 22px;
+            padding: 14px 18px;
+            background: #fff8e1;
+            border-left: 5px solid #f59e0b;
+            border-radius: 8px;
+        }
 
-    .table-modern th {
-        text-align: left;
-        font-size: 14px;
-        color: #666;
-        padding: 10px;
-        border-bottom: 2px solid #eee;
-    }
+        .info-denda .icon {
+            font-size: 22px;
+        }
 
-    .table-modern td {
-        padding: 12px 10px;
-        border-bottom: 1px solid #eee;
-    }
+        .info-denda .text {
+            color: #92400e;
+            line-height: 1.6;
+            font-size: 14px;
+        }
 
-    .table-modern tr:hover {
-        background: #f9fafb;
-    }
+        .info-denda .text strong {
+            display: block;
+            margin-bottom: 4px;
+            color: #78350f;
+        }
 
-    .status-kembali {
-        color: #16a34a;
-        font-weight: 600;
-    }
+        .table-modern {
+            width: 100%;
+            border-collapse: collapse;
+        }
 
-    .status-lunas {
-        color: #2563eb;
-        font-weight: 600;
-    }
+        .table-modern th {
+            text-align: left;
+            font-size: 14px;
+            color: #666;
+            padding: 10px;
+            border-bottom: 2px solid #eee;
+        }
 
-    .denda-dibayar {
-        color: #16a34a;
-        font-weight: 600;
-    }
+        .table-modern td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #eee;
+        }
 
-    .empty {
-        text-align: center;
-        padding: 20px;
-        color: #888;
-    }
-</style>
+        .table-modern tr:hover {
+            background: #f9fafb;
+        }
 
-<div class="wrapper">
+        .status-kembali {
+            color: #16a34a;
+            font-weight: 600;
+        }
 
-    <div class="sirkulasi">
-        <h3>SIRKULASI</h3>
-        <div class="menu">
-            <a href="/mahasiswa/sirkulasi">Mulai Transaksi</a>
-            <a class="active">Sejarah Peminjaman</a>
+        .status-lunas {
+            color: #2563eb;
+            font-weight: 600;
+        }
+
+        .denda-dibayar {
+            color: #16a34a;
+            font-weight: 600;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+        }
+    </style>
+
+    <div class="wrapper">
+
+        <div class="sirkulasi">
+            <h3>SIRKULASI</h3>
+            <div class="menu">
+                <a href="/mahasiswa/sirkulasi">Mulai Transaksi</a>
+                <a class="active">Sejarah Peminjaman</a>
+            </div>
         </div>
-    </div>
 
-    <div class="transaksi">
+        <div class="transaksi">
 
-        <div class="tabs">
-            <a href="/mahasiswa/sirkulasi">Peminjaman (F2)</a>
-            <a href="/mahasiswa/pinjaman">Pinjaman Saat Ini (F3)</a>
-            <a href="/mahasiswa/denda">Denda (F9)</a>
-            <a class="active">Sejarah Peminjaman (F10)</a>
+            <div class="info-denda">
+
+                <div class="icon">
+                    📢
+                </div>
+
+                <div class="text">
+
+                    <strong>Informasi Perhitungan Denda</strong>
+
+                    Denda keterlambatan hanya dihitung pada <b>hari kerja</b>.
+                    Hari <b>Sabtu</b>, <b>Minggu</b>, dan <b>hari libur resmi perpustakaan</b>
+                    tidak diperhitungkan sebagai hari keterlambatan sehingga
+                    <b>tidak menambah nominal denda</b>.
+
+                </div>
+
+            </div>
+
+            <div class="tabs">
+                <a href="/mahasiswa/sirkulasi">Peminjaman (F2)</a>
+                <a href="/mahasiswa/pengembalian">Pengembalian (F4)</a>
+                <a href="/mahasiswa/pinjaman">Pinjaman Saat Ini (F3)</a>
+                <a href="/mahasiswa/denda">Denda (F9)</a>
+                <a class="active">Sejarah Peminjaman (F10)</a>
+            </div>
+
+            <h3 style="margin-bottom:20px;">Sejarah Peminjaman</h3>
+
+            <table class="table-modern">
+
+                <tr>
+                    <th>Nama</th>
+                    <th>Judul Buku</th>
+                    <th>Tanggal Pinjam</th>
+                    <th>Tanggal Kembali</th>
+                    <th>Tanggal Bayar</th>
+                    <th>Denda Dibayar</th>
+                    <th>Status</th>
+                </tr>
+
+                @forelse($loans as $loan)
+                    <tr>
+                        <td>{{ $loan->user->name }}</td>
+                        <td>{{ $loan->book->judul }}</td>
+                        <td>{{ $loan->tanggal_pinjam->format('d M Y') }}</td>
+                        <td>{{ $loan->tanggal_kembali->format('d M Y') }}</td>
+
+                        <td>
+                            @if($loan->tanggal_bayar)
+                                {{ $loan->tanggal_bayar->format('d M Y') }}
+                            @else
+                                -
+                            @endif
+                        </td>
+
+                        <td class="denda-dibayar">
+                            Rp {{ number_format($loan->denda_dibayar ?? 0, 0, ',', '.') }}
+                        </td>
+
+                        <td>
+                            @if($loan->status == 'lunas')
+                                <span class="status-lunas">Lunas</span>
+                            @else
+                                <span class="status-kembali">Kembali</span>
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7" class="empty">
+                            Belum ada riwayat peminjaman
+                        </td>
+                    </tr>
+                @endforelse
+
+            </table>
+
         </div>
 
-        <h3 style="margin-bottom:20px;">Sejarah Peminjaman</h3>
-
-        <table class="table-modern">
-
-            <tr>
-                <th>Nama</th>
-                <th>Judul Buku</th>
-                <th>Tanggal Pinjam</th>
-                <th>Tanggal Kembali</th>
-                <th>Tanggal Bayar</th>
-                <th>Denda Dibayar</th>
-                <th>Status</th>
-            </tr>
-
-            @forelse($loans as $loan)
-            <tr>
-                <td>{{ $loan->user->name }}</td>
-                <td>{{ $loan->book->judul }}</td>
-                <td>{{ $loan->tanggal_pinjam->format('d M Y') }}</td>
-                <td>{{ $loan->tanggal_kembali->format('d M Y') }}</td>
-
-                <td>
-                    @if($loan->tanggal_bayar)
-                        {{ $loan->tanggal_bayar->format('d M Y') }}
-                    @else
-                        -
-                    @endif
-                </td>
-
-                <td class="denda-dibayar">
-                    Rp {{ number_format($loan->denda_dibayar ?? 0, 0, ',', '.') }}
-                </td>
-
-                <td>
-                    @if($loan->status == 'lunas')
-                        <span class="status-lunas">Lunas</span>
-                    @else
-                        <span class="status-kembali">Kembali</span>
-                    @endif
-                </td>
-            </tr>
-            @empty
-            <tr>
-                <td colspan="7" class="empty">
-                    Belum ada riwayat peminjaman
-                </td>
-            </tr>
-            @endforelse
-
-        </table>
-
     </div>
-
-</div>
 
 @endsection

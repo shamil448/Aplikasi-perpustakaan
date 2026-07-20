@@ -17,9 +17,19 @@ use Midtrans\Snap;
 
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\LaporanKeuanganExport;
+use App\Services\WorkingDayService;
 
 class SirkulasiController extends Controller
 {
+
+    private function hitungDenda(Loan $loan): int
+    {
+        return WorkingDayService::calculateFine(
+            Carbon::parse($loan->tanggal_kembali)->startOfDay(),
+            now()->startOfDay()
+        );
+    }
+
     // =============================
     // PINJAM BUKU
     // =============================
@@ -183,12 +193,12 @@ class SirkulasiController extends Controller
                 Http::withHeaders([
                     'Authorization' => config('services.fonnte.token')
                 ])->post(
-                    'https://api.fonnte.com/send',
-                    [
-                        'target' => $nomor,
-                        'message' => $pesan,
-                    ]
-                );
+                        'https://api.fonnte.com/send',
+                        [
+                            'target' => $nomor,
+                            'message' => $pesan,
+                        ]
+                    );
             } catch (\Exception $e) {
 
                 \Log::error('WA Pinjam Gagal', [
@@ -216,10 +226,16 @@ class SirkulasiController extends Controller
     public function pinjamanSaatIni()
     {
         $loans = Loan::where('user_id', auth()->id())
-            ->where('status', 'dipinjam') // 🔥 penting
+            ->where('status', 'dipinjam')
             ->with('book')
             ->latest()
             ->get();
+
+        foreach ($loans as $loan) {
+
+            $loan->denda = $this->hitungDenda($loan);
+
+        }
 
         return view('mahasiswa.pinjaman', compact('loans'));
     }
@@ -295,12 +311,12 @@ class SirkulasiController extends Controller
                 Http::withHeaders([
                     'Authorization' => config('services.fonnte.token')
                 ])->post(
-                    'https://api.fonnte.com/send',
-                    [
-                        'target' => $nomor,
-                        'message' => $pesan,
-                    ]
-                );
+                        'https://api.fonnte.com/send',
+                        [
+                            'target' => $nomor,
+                            'message' => $pesan,
+                        ]
+                    );
             } catch (\Exception $e) {
 
                 \Log::error('WA Perpanjang Gagal', [
@@ -328,15 +344,14 @@ class SirkulasiController extends Controller
             return back()->with('error', 'Akses ditolak');
         }
 
-        $today = Carbon::now();
-        $jatuhTempo = Carbon::parse($loan->tanggal_kembali);
+        $today = now()->startOfDay();
+        $jatuhTempo = Carbon::parse($loan->tanggal_kembali)->startOfDay();
 
-        if ($today <= $jatuhTempo) {
+        if ($today->lte($jatuhTempo)) {
             return back()->with('error', 'Belum terlambat');
         }
 
-        $telatHari = $jatuhTempo->diffInDays($today);
-        $denda = $telatHari * 1000;
+        $denda = $this->hitungDenda($loan);
 
         // simpan ke database
         $loan->denda = $denda;
@@ -361,9 +376,8 @@ class SirkulasiController extends Controller
 
         $denda = 0;
 
-        if ($today > $jatuhTempo) {
-            $telatHari = $jatuhTempo->diffInDays($today);
-            $denda = $telatHari * 1000;
+        if ($today->gt($jatuhTempo)) {
+            $denda = $this->hitungDenda($loan);
         }
 
         // simpan nominal denda terbaru ke database
@@ -536,12 +550,12 @@ class SirkulasiController extends Controller
                         Http::withHeaders([
                             'Authorization' => config('services.fonnte.token')
                         ])->post(
-                            'https://api.fonnte.com/send',
-                            [
-                                'target' => $nomor,
-                                'message' => $pesan,
-                            ]
-                        );
+                                'https://api.fonnte.com/send',
+                                [
+                                    'target' => $nomor,
+                                    'message' => $pesan,
+                                ]
+                            );
 
                         $loan->wa_lunas_terkirim = true;
                         $loan->save();
@@ -592,6 +606,12 @@ class SirkulasiController extends Controller
             ->latest()
             ->get();
 
+        foreach ($loans as $loan) {
+
+            $loan->denda = $this->hitungDenda($loan);
+
+        }
+
         return view('mahasiswa.denda', compact('loans'));
     }
 
@@ -604,13 +624,22 @@ class SirkulasiController extends Controller
             return back()->with('error', 'Akses ditolak');
         }
 
-        // cek sudah lewat jatuh tempo
-        if (now() <= $loan->tanggal_kembali) {
+        $today = now()->startOfDay();
+
+        $jatuhTempo = Carbon::parse($loan->tanggal_kembali)->startOfDay();
+
+        $denda = $this->hitungDenda($loan);
+
+        if ($today->lte($jatuhTempo) || $denda <= 0) {
             return back()->with('error', 'Belum kena denda');
         }
 
+        // hitung denda terbaru
+        $loan->denda = $denda;
+
         // ubah status
         $loan->status = 'denda';
+
         $loan->save();
 
         // ==========================
@@ -656,9 +685,9 @@ class SirkulasiController extends Controller
                     Http::withHeaders([
                         'Authorization' => config('services.fonnte.token')
                     ])->post('https://api.fonnte.com/send', [
-                        'target' => $nomor,
-                        'message' => $pesan,
-                    ]);
+                                'target' => $nomor,
+                                'message' => $pesan,
+                            ]);
 
                     $loan->wa_denda_terkirim = true;
                     $loan->save();
@@ -830,17 +859,15 @@ class SirkulasiController extends Controller
         // CEK SUDAH LEWAT JATUH TEMPO
         // =====================================
 
-        $today = now()->startOfDay();
+        $denda = $this->hitungDenda($loan);
 
-        $jatuhTempo = \Carbon\Carbon::parse(
-            $loan->tanggal_kembali
-        )->startOfDay();
-
-        if ($today->gt($jatuhTempo)) {
+        if ($denda > 0) {
 
             return back()->with(
                 'error',
-                'Buku tidak dapat dikembalikan karena Anda terkena denda. Silakan aktivasi dan lunasi denda terlebih dahulu agar dapat menggunakan layanan perpustakaan kembali.'
+                'Buku tidak dapat dikembalikan karena Anda memiliki denda sebesar Rp '
+                . number_format($denda, 0, ',', '.')
+                . '. Silakan aktivasi dan lunasi denda terlebih dahulu agar dapat menggunakan layanan perpustakaan kembali.'
             );
         }
 
@@ -913,12 +940,12 @@ class SirkulasiController extends Controller
                 Http::withHeaders([
                     'Authorization' => config('services.fonnte.token')
                 ])->post(
-                    'https://api.fonnte.com/send',
-                    [
-                        'target' => $nomor,
-                        'message' => $pesan,
-                    ]
-                );
+                        'https://api.fonnte.com/send',
+                        [
+                            'target' => $nomor,
+                            'message' => $pesan,
+                        ]
+                    );
             } catch (\Exception $e) {
 
                 \Log::error('WA Pengembalian Gagal', [

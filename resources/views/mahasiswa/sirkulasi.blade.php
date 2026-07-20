@@ -94,6 +94,33 @@ $q->where('status', 'dipinjam')
             font-weight: 600;
         }
 
+        .info-denda {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 22px;
+    padding: 14px 18px;
+    background: #fff8e1;
+    border-left: 5px solid #f59e0b;
+    border-radius: 8px;
+}
+
+.info-denda .icon {
+    font-size: 22px;
+}
+
+.info-denda .text {
+    color: #92400e;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+.info-denda .text strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #78350f;
+}
+
         .form-pinjam {
             display: flex;
             align-items: center;
@@ -156,9 +183,29 @@ $q->where('status', 'dipinjam')
 
         <div class="transaksi">
 
+        <div class="info-denda">
+
+    <div class="icon">
+        📢
+    </div>
+
+    <div class="text">
+
+        <strong>Informasi Perhitungan Denda</strong>
+
+        Denda keterlambatan hanya dihitung pada <b>hari kerja</b>.
+        Hari <b>Sabtu</b>, <b>Minggu</b>, dan <b>hari libur resmi perpustakaan</b>
+        tidak diperhitungkan sebagai hari keterlambatan sehingga
+        <b>tidak menambah nominal denda</b>.
+
+    </div>
+
+</div>
+
             <div class="tabs">
 
                 <a class="active">Peminjaman (F2)</a>
+                <a href="/mahasiswa/pengembalian">Pengembalian (F4)</a>
                 <a href="/mahasiswa/pinjaman">Pinjaman Saat Ini (F3)</a>
                 <a href="/mahasiswa/denda">Denda (F9)</a>
                 <a href="/mahasiswa/sejarah">Sejarah Peminjaman (F10)</a>

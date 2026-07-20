@@ -2,412 +2,428 @@
 
 @section('content')
 
-<style>
-    .wrapper {
-        display: flex;
-        gap: 30px;
-    }
+    <style>
+        .wrapper {
+            display: flex;
+            gap: 30px;
+        }
 
-    .sirkulasi {
-        width: 320px;
-        background: linear-gradient(180deg, #1e40af, #2563eb);
-        padding: 30px;
-        border-radius: 15px;
-        color: white;
-    }
+        .sirkulasi {
+            width: 320px;
+            background: linear-gradient(180deg, #1e40af, #2563eb);
+            padding: 30px;
+            border-radius: 15px;
+            color: white;
+        }
 
-    .sirkulasi h3 {
-        margin-bottom: 20px;
-        font-size: 14px;
-        opacity: .8;
-    }
+        .sirkulasi h3 {
+            margin-bottom: 20px;
+            font-size: 14px;
+            opacity: .8;
+        }
 
-    .menu {
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
-    }
+        .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
 
-    .menu a {
-        text-decoration: none;
-        color: white;
-        font-size: 18px;
-        padding: 12px 18px;
-        border-radius: 30px;
-    }
+        .menu a {
+            text-decoration: none;
+            color: white;
+            font-size: 18px;
+            padding: 12px 18px;
+            border-radius: 30px;
+        }
 
-    .menu a.active {
-        background: white;
-        color: #2563eb;
-        font-weight: 600;
-    }
+        .menu a.active {
+            background: white;
+            color: #2563eb;
+            font-weight: 600;
+        }
 
-    .transaksi {
-        flex: 1;
-        background: white;
-        padding: 25px;
-        border-radius: 10px;
-        box-shadow: 0 3px 10px rgba(0, 0, 0, .08);
-    }
+        .transaksi {
+            flex: 1;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, .08);
+        }
 
-    .tabs {
-        display: flex;
-        gap: 25px;
-        padding-bottom: 10px;
-        margin-bottom: 25px;
-    }
+        .tabs {
+            display: flex;
+            gap: 25px;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+        }
 
-    .tabs a {
-        text-decoration: none;
-        color: #444;
-        font-weight: 500;
-        position: relative;
-        transition: 0.2s;
-    }
+        .tabs a {
+            text-decoration: none;
+            color: #444;
+            font-weight: 500;
+            position: relative;
+            transition: 0.2s;
+        }
 
-    .tabs a:hover {
-        color: #2563eb;
-    }
+        .tabs a:hover {
+            color: #2563eb;
+        }
 
-    .tabs a.active {
-        color: #2563eb;
-        font-weight: 600;
-    }
+        .tabs a.active {
+            color: #2563eb;
+            font-weight: 600;
+        }
 
-    .tabs a.active::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        bottom: -5px;
-        width: 100%;
-        height: 2px;
-        background: #2563eb;
-        border-radius: 2px;
-    }
+        .tabs a.active::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -5px;
+            width: 100%;
+            height: 2px;
+            background: #2563eb;
+            border-radius: 2px;
+        }
 
-    .badge {
-        background: #dc2626;
-        color: white;
-        font-size: 11px;
-        padding: 3px 7px;
-        border-radius: 50px;
-        margin-left: 6px;
-        font-weight: 600;
-    }
+        .info-denda {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 22px;
+            padding: 14px 18px;
+            background: #fff8e1;
+            border-left: 5px solid #f59e0b;
+            border-radius: 8px;
+        }
 
-    .table-modern {
-        width: 100%;
-        border-collapse: collapse;
-    }
+        .info-denda .icon {
+            font-size: 22px;
+        }
 
-    .table-modern th {
-        text-align: left;
-        font-size: 14px;
-        color: #666;
-        padding: 10px;
-        border-bottom: 2px solid #eee;
-    }
+        .info-denda .text {
+            color: #92400e;
+            line-height: 1.6;
+            font-size: 14px;
+        }
 
-    .table-modern td {
-        padding: 12px 10px;
-        border-bottom: 1px solid #eee;
-    }
+        .info-denda .text strong {
+            display: block;
+            margin-bottom: 4px;
+            color: #78350f;
+        }
 
-    .table-modern tr:hover {
-        background: #f9fafb;
-    }
+        .badge {
+            background: #dc2626;
+            color: white;
+            font-size: 11px;
+            padding: 3px 7px;
+            border-radius: 50px;
+            margin-left: 6px;
+            font-weight: 600;
+        }
 
-    .empty {
-        text-align: center;
-        padding: 20px;
-        color: #888;
-    }
+        .table-modern {
+            width: 100%;
+            border-collapse: collapse;
+        }
 
-    .btn {
-        padding: 6px 10px;
-        border: none;
-        border-radius: 6px;
-        color: white;
-        cursor: pointer;
-        font-size: 12px;
-        display: inline-block;
-        text-decoration: none;
-        margin-bottom: 5px;
-    }
+        .table-modern th {
+            text-align: left;
+            font-size: 14px;
+            color: #666;
+            padding: 10px;
+            border-bottom: 2px solid #eee;
+        }
 
-    .btn-green {
-        background: #16a34a;
-    }
+        .table-modern td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #eee;
+        }
 
-    .btn-red {
-        background: #dc2626;
-    }
+        .table-modern tr:hover {
+            background: #f9fafb;
+        }
 
-    .btn-blue {
-        background: #2563eb;
-    }
+        .empty {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+        }
 
-    .alert-success {
-        background: #dcfce7;
-        color: #166534;
-        padding: 12px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        font-weight: 600;
-    }
+        .btn {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            display: inline-block;
+            text-decoration: none;
+            margin-bottom: 5px;
+        }
 
-    .alert-error {
-        background: #fee2e2;
-        color: #991b1b;
-        padding: 12px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        font-weight: 600;
-    }
-</style>
+        .btn-green {
+            background: #16a34a;
+        }
 
-@php
+        .btn-red {
+            background: #dc2626;
+        }
 
-$dendaCount = \App\Models\Loan::where(
-'user_id',
-auth()->id()
-)
-->where('status', 'denda')
-->count();
+        .btn-blue {
+            background: #2563eb;
+        }
 
-@endphp
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
 
-<div class="wrapper">
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+    </style>
 
-    <div class="sirkulasi">
+    @php
 
-        <h3>SIRKULASI</h3>
+        $dendaCount = \App\Models\Loan::where(
+            'user_id',
+            auth()->id()
+        )
+            ->where('status', 'denda')
+            ->count();
 
-        <div class="menu">
+    @endphp
 
-            <a href="/mahasiswa/sirkulasi">
-                Mulai Transaksi
-            </a>
+    <div class="wrapper">
 
-            <a href="/mahasiswa/sejarah">
-                Sejarah Peminjaman
-            </a>
+        <div class="sirkulasi">
 
-        </div>
+            <h3>SIRKULASI</h3>
 
-    </div>
+            <div class="menu">
 
-    <div class="transaksi">
+                <a href="/mahasiswa/sirkulasi">
+                    Mulai Transaksi
+                </a>
 
-        <div class="tabs">
+                <a href="/mahasiswa/sejarah">
+                    Sejarah Peminjaman
+                </a>
 
-            <a href="/mahasiswa/sirkulasi">
-                Peminjaman (F2)
-            </a>
-
-            <a
-                href="/mahasiswa/pinjaman"
-                class="active">
-
-                Pinjaman Saat Ini (F3)
-
-            </a>
-
-            <a href="/mahasiswa/pengembalian">
-                Pengembalian (F4)
-            </a>
-
-            <a href="/mahasiswa/denda">
-
-                Denda (F9)
-
-                @if($dendaCount > 0)
-                <span class="badge">
-                    {{ $dendaCount }}
-                </span>
-                @endif
-
-            </a>
-
-            <a href="/mahasiswa/sejarah">
-                Sejarah Peminjaman (F10)
-            </a>
+            </div>
 
         </div>
 
-        @if(session('success'))
+        <div class="transaksi">
 
-        <div class="alert-success">
-            {{ session('success') }}
-        </div>
+            <div class="info-denda">
 
-        @endif
+                <div class="icon">
+                    📢
+                </div>
 
-        @if(session('error'))
+                <div class="text">
 
-        <div class="alert-error">
-            {{ session('error') }}
-        </div>
+                    <strong>Informasi Perhitungan Denda</strong>
 
-        @endif
+                    Denda keterlambatan hanya dihitung pada <b>hari kerja</b>.
+                    Hari <b>Sabtu</b>, <b>Minggu</b>, dan <b>hari libur resmi perpustakaan</b>
+                    tidak diperhitungkan sebagai hari keterlambatan sehingga
+                    <b>tidak menambah nominal denda</b>.
 
-        <h3 style="margin-bottom:20px;">
-            Pinjaman Saat Ini
-        </h3>
+                </div>
 
-        <table class="table-modern">
+            </div>
 
-            <tr>
-                <th>Kode</th>
-                <th>Judul</th>
-                <th>Pinjam</th>
-                <th>Kembali</th>
-                <th>Denda</th>
-                <th>Aksi</th>
-            </tr>
+            <div class="tabs">
 
-            @forelse($loans as $loan)
+                <a href="/mahasiswa/sirkulasi">
+                    Peminjaman (F2)
+                </a>
 
-            @php
+                <a href="/mahasiswa/pengembalian">
+                    Pengembalian (F4)
+                </a>
 
-            $today = now()->startOfDay();
+                <a href="/mahasiswa/pinjaman" class="active">
 
-            $jatuhTempo =
-            \Carbon\Carbon::parse(
-            $loan->tanggal_kembali
-            )->startOfDay();
+                    Pinjaman Saat Ini (F3)
 
-            $telatHari = 0;
-            $denda = 0;
+                </a>
 
-            if ($today->gt($jatuhTempo)) {
+                <a href="/mahasiswa/denda">
 
-            $telatHari =
-            $jatuhTempo->diffInDays($today);
+                    Denda (F9)
 
-            $denda =
-            $telatHari * 1000;
+                    @if($dendaCount > 0)
+                        <span class="badge">
+                            {{ $dendaCount }}
+                        </span>
+                    @endif
 
-            if ($loan->denda != $denda) {
+                </a>
 
-            $loan->denda = $denda;
+                <a href="/mahasiswa/sejarah">
+                    Sejarah Peminjaman (F10)
+                </a>
 
-            $loan->save();
-            }
-            }
+            </div>
 
-            $besokJatuhTempo =
-            $today->copy()
-            ->addDay()
-            ->isSameDay($jatuhTempo);
+            @if(session('success'))
 
-            @endphp
+                <div class="alert-success">
+                    {{ session('success') }}
+                </div>
 
-            <tr>
+            @endif
 
-                <td>
-                    {{ $loan->kode_eksemplar }}
-                </td>
+            @if(session('error'))
 
-                <td>
-                    {{ $loan->book->judul }}
-                </td>
+                <div class="alert-error">
+                    {{ session('error') }}
+                </div>
 
-                <td>
-                    {{ $loan->tanggal_pinjam->format('d M Y') }}
-                </td>
+            @endif
 
-                <td>
-                    {{ $loan->tanggal_kembali->format('d M Y') }}
-                </td>
+            <h3 style="margin-bottom:20px;">
+                Pinjaman Saat Ini
+            </h3>
 
-                <td>
+            <table class="table-modern">
 
-                    @if($denda > 0)
+                <tr>
+                    <th>Kode</th>
+                    <th>Judul</th>
+                    <th>Pinjam</th>
+                    <th>Kembali</th>
+                    <th>Denda</th>
+                    <th>Aksi</th>
+                </tr>
 
-                    <span style="color:#dc2626;font-weight:600;">
+                @forelse($loans as $loan)
 
-                        Rp {{ number_format(
+                    @php
+
+                        $today = now()->startOfDay();
+
+                        $jatuhTempo = $loan->tanggal_kembali->copy()->startOfDay();
+
+                        $denda = $loan->denda;
+
+                        $besokJatuhTempo =
+                            $today->copy()
+                                ->addDay()
+                                ->isSameDay($jatuhTempo);
+
+                    @endphp
+
+                    <tr>
+
+                        <td>
+                            {{ $loan->kode_eksemplar }}
+                        </td>
+
+                        <td>
+                            {{ $loan->book->judul }}
+                        </td>
+
+                        <td>
+                            {{ $loan->tanggal_pinjam->format('d M Y') }}
+                        </td>
+
+                        <td>
+                            {{ $loan->tanggal_kembali->format('d M Y') }}
+                        </td>
+
+                        <td>
+
+                            @if($denda > 0)
+
+                                            <span style="color:#dc2626;font-weight:600;">
+
+                                                Rp {{ number_format(
                                     $denda,
                                     0,
                                     ',',
                                     '.'
                                 ) }}
 
-                    </span>
+                                            </span>
 
-                    @else
+                            @else
 
-                    -
+                                -
 
-                    @endif
+                            @endif
 
-                </td>
+                        </td>
 
-                <td>
+                        <td>
 
-                    @if(!$loan->is_extended && $besokJatuhTempo)
+                            @if(!$loan->is_extended && $besokJatuhTempo)
 
-                    <form
-                        method="POST"
-                        action="/mahasiswa/perpanjang/{{ $loan->id }}">
+                                <form method="POST" action="/mahasiswa/perpanjang/{{ $loan->id }}">
 
-                        @csrf
+                                    @csrf
 
-                        <button
-                            type="submit"
-                            class="btn btn-green">
+                                    <button type="submit" class="btn btn-green">
 
-                            Perpanjang 2 Hari
+                                        Perpanjang 2 Hari
 
-                        </button>
+                                    </button>
 
-                    </form>
+                                </form>
 
-                    @endif
+                            @endif
 
-                    @if($denda > 0)
+                            @if($denda > 0)
 
-                    <form
-                        method="POST"
-                        action="/mahasiswa/aktivasi-denda/{{ $loan->id }}">
+                                <form method="POST" action="/mahasiswa/aktivasi-denda/{{ $loan->id }}">
 
-                        @csrf
+                                    @csrf
 
-                        <button
-                            type="submit"
-                            class="btn btn-red">
+                                    <button type="submit" class="btn btn-red">
 
-                            Aktivasi Denda
+                                        Aktivasi Denda
 
-                        </button>
+                                    </button>
 
-                    </form>
+                                </form>
 
-                    @endif
+                            @endif
 
-                </td>
+                        </td>
 
-            </tr>
+                    </tr>
 
-            @empty
+                @empty
 
-            <tr>
+                    <tr>
 
-                <td colspan="6" class="empty">
+                        <td colspan="6" class="empty">
 
-                    Tidak ada buku yang sedang dipinjam
+                            Tidak ada buku yang sedang dipinjam
 
-                </td>
+                        </td>
 
-            </tr>
+                    </tr>
 
-            @endforelse
+                @endforelse
 
-        </table>
+            </table>
+
+        </div>
 
     </div>
-
-</div>
 
 @endsection

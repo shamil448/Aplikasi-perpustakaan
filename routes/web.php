@@ -8,6 +8,7 @@ use App\Http\Controllers\MahasiswaDashboardController;
 use App\Http\Controllers\DosenDashboardController;
 use App\Http\Controllers\SirkulasiController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\HolidayController;
 
 
 // =======================
@@ -70,6 +71,22 @@ Route::middleware(['auth', 'role:staff'])->group(function () {
     Route::get('/eksemplar', [BookController::class, 'daftarEksemplar']);
     Route::get('/eksemplar-keluar', [BookController::class, 'eksemplarKeluar']);
     Route::get('/eksemplar-denda', [BookController::class, 'eksemplarDenda']);
+
+    // =======================
+    // HARI LIBUR
+    // =======================
+
+    Route::get('/holidays', [HolidayController::class, 'index']);
+
+    Route::get('/holidays/create', [HolidayController::class, 'create']);
+
+    Route::post('/holidays', [HolidayController::class, 'store']);
+
+    Route::get('/holidays/{id}/edit', [HolidayController::class, 'edit']);
+
+    Route::put('/holidays/{id}', [HolidayController::class, 'update']);
+
+    Route::delete('/holidays/{id}', [HolidayController::class, 'destroy']);
 
     // anggota
     Route::get('/anggota', [MemberController::class, 'index']);

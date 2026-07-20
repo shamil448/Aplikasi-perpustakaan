@@ -6,6 +6,7 @@ use App\Models\Book;
 use App\Models\Loan;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Services\WorkingDayService;
 
 class BookController extends Controller
 {
@@ -275,10 +276,16 @@ class BookController extends Controller
         }
 
         $loans = $query->latest()->get()->filter(function ($loan) {
-            $today = now()->startOfDay();
-            $jatuhTempo = Carbon::parse($loan->tanggal_kembali)->startOfDay();
 
-            return $loan->status == 'denda' || $today->gt($jatuhTempo);
+            if ($loan->status === 'denda') {
+                return true;
+            }
+
+            return WorkingDayService::calculateFine(
+                Carbon::parse($loan->tanggal_kembali)->startOfDay(),
+                now()->startOfDay()
+            ) > 0;
+
         });
 
         return view('books.eksemplar-denda', compact('loans'));

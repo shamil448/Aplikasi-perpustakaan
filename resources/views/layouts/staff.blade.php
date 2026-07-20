@@ -289,23 +289,23 @@
 
                         @if(Auth::user()->is_online)
 
-                        <span style="
-                color:#4ade80;
-                font-weight:bold;
-                margin-left:5px;
-            ">
-                            ● Online
-                        </span>
+                                        <span style="
+                                color:#4ade80;
+                                font-weight:bold;
+                                margin-left:5px;
+                            ">
+                                            ● Online
+                                        </span>
 
                         @else
 
-                        <span style="
-                color:#ef4444;
-                font-weight:bold;
-                margin-left:5px;
-            ">
-                            ● Offline
-                        </span>
+                                        <span style="
+                                color:#ef4444;
+                                font-weight:bold;
+                                margin-left:5px;
+                            ">
+                                            ● Offline
+                                        </span>
 
                         @endif
 
@@ -323,7 +323,12 @@
             <a href="/eksemplar-keluar">Daftar Eksemplar Keluar</a>
             <a href="/eksemplar-denda">Daftar Eksemplar Denda</a>
 
+            <h4>MASTER DATA</h4>
+
+            <a href="/holidays">Hari Libur</a>
+
             <h4>LAINNYA</h4>
+
             <a href="/staff/laporan-keuangan">Laporan Keuangan</a>
 
         </div>
